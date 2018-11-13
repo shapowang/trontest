@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <title>vagas monitor</title>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+            integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+            integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+            crossorigin="anonymous"></script>
+    <script type="application/javascript" src="mustache.js"></script>
+    <script id="template" type="x-tmpl-mustache">
+    <table class="table table-hover table-responsive table-sm border border-success" style="border:0;padding:0;margin:0">
+    <tr>
+        <td><a target="_blank" href="https://jungle.bloks.io/account/{{account_name}}">{{account_name}}</a></td>
+        <td>可转账余额:{{core_liquid_balance}}</td>
+        <td>总余额(包括自己质押的CPU和NET):{{balance}} EOS</td>
+        <td id="{{account_name}}_evt">{{evt_balance}}</td>
+    </tr>
+    <tr>
+        <td>CPU：{{cpu_limit.used}}/{{cpu_limit.max}}<div class="rounded bg-success" style="width:100px;height:20px;"><div class="rounded bg-warning" style="width:{{cpu_percent}}%;height:20px"></div><div></td>
+        <td>NET：{{net_limit.used}}/{{net_limit.max}}<div class="rounded bg-success" style="width:100px;height:20px;"><div class="rounded bg-warning" style="width:{{net_percent}}%;height:20px"></div><div></td>
+        <td>RAM：{{ram_usage}}/{{ram_quota}}         <div class="rounded bg-success" style="width:100px;height:20px;"><div class="rounded bg-warning" style="width:{{ram_percent}}%;height:20px"></div><div></td>
+    </tr>
+    <tr>
+        <td>EOS转账次数：1</td>
+        <td>EVT转账次数：2</td>
+    </tr>
+    <tr>
+    <td colspan="4">
+        <table>
+            {{#permissions}}
+            <tr class="table-warning">
+                <td>权限名称:{{perm_name}} 详细:{{required_auth_str}}</td>
+            </tr>
+            {{/permissions}}
+        </table>
+    </td>
+    </tr>
+</table>
+    </script>
+    <style type="text/css">
+        table {
+        }
+
+        td {
+        }
+    </style>
+</head>
+<body>
+<div id="target">
+    <h1 class="mx-auto align-middle">加载中，请稍候...</h1>
+</div>
+<script type="application/javascript">
+    var template = $('#template').html();
+    Mustache.parse(template);   // optional, speeds up future uses
+    var setEvtBalance = function (accountName) {
+        $.ajax("/evt_balance?account=" + accountName, {
+            success: function (arg) {
+                $("#" + accountName + "_evt").text("EVT余额：" + arg.result);
+            }
+        });
+    };
+    $(function () {
+        $.ajax("/accounts", {
+            success: function (arg) {
+                var $target = $('#target');
+                $target.empty();
+                console.log(arg);
+                for (var i = 0; i < arg.result.length; i++) {
+                    var account = JSON.parse(arg.result[i]);
+                    account.balance = parseFloat(account.core_liquid_balance) + parseFloat(account.self_delegated_bandwidth.cpu_weight) + parseFloat(account.self_delegated_bandwidth.net_weight);
+                    account.cpu_percent = 100 * account.cpu_limit.used / account.cpu_limit.max;
+                    account.net_percent = 100 * account.net_limit.used / account.net_limit.max;
+                    account.ram_percent = 100 * account.ram_usage / account.ram_quota;
+                    for (var j = 0; j < account.permissions.length; j++) {
+                        var permission = account.permissions[j];
+                        var required_auth_str = "";
+                        if (permission.required_auth.waits.length === 0 && permission.required_auth.threshold === 1) {
+                            for (var k = 0; k < permission.required_auth.accounts.length; k++) {
+                                var permAccount = permission.required_auth.accounts[k];
+                                required_auth_str += "actor:" + permAccount.permission.actor + " , " + " permission: " + permAccount.permission.permission;
+                            }
+                            for (var k = 0; k < permission.required_auth.keys.length; k++) {
+                                var permKey = permission.required_auth.keys[k];
+                                required_auth_str += "key:" + permKey.key;
+                            }
+                        } else {
+                            required_auth_str = JSON.stringify(permission.required_auth);
+                        }
+                        permission.required_auth_str = required_auth_str;
+                    }
+                    var rendered = Mustache.render(template, account);
+                    $target.append(rendered);
+                    console.log(account);
+                    setEvtBalance(account.account_name);
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>
