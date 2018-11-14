@@ -21,28 +21,28 @@
             crossorigin="anonymous"></script>
     <script type="application/javascript" src="mustache.js"></script>
     <script id="template" type="x-tmpl-mustache">
-    <table class="table table-hover table-responsive table-sm border border-success" style="border:0;padding:0;margin:0">
+    <table class="accounttable table table-hover table-responsive table-sm border border-success" style="border:0;padding:0;margin:0">
     <tr>
-        <td><a target="_blank" href="https://jungle.bloks.io/account/{{account_name}}">{{account_name}}</a></td>
-        <td>可转账余额:{{core_liquid_balance}}</td>
-        <td>总余额(包括自己质押的CPU和NET):{{balance}} EOS</td>
+        <td colspan="2">{{account_name_zh}}</td>
+        <td colspan="2"><a target="_blank" href="https://jungle.bloks.io/account/{{account_name}}">{{account_name}}</a></td>
+    </tr>
+    <tr>
+        <td>{{core_liquid_balance}}</td>
         <td id="{{account_name}}_evt">{{evt_balance}}</td>
+        <td>EOS转账:1次</td>
+        <td>EVT转账:2次</td>
     </tr>
     <tr>
-        <td>CPU：{{cpu_limit.used}}/{{cpu_limit.max}}<div class="rounded bg-success" style="width:100px;height:20px;"><div class="rounded bg-warning" style="width:{{cpu_percent}}%;height:20px"></div><div></td>
-        <td>NET：{{net_limit.used}}/{{net_limit.max}}<div class="rounded bg-success" style="width:100px;height:20px;"><div class="rounded bg-warning" style="width:{{net_percent}}%;height:20px"></div><div></td>
-        <td>RAM：{{ram_usage}}/{{ram_quota}}         <div class="rounded bg-success" style="width:100px;height:20px;"><div class="rounded bg-warning" style="width:{{ram_percent}}%;height:20px"></div><div></td>
-    </tr>
-    <tr>
-        <td>EOS转账次数：1</td>
-        <td>EVT转账次数：2</td>
+        <td><div class="rounded bg-success" style="width:130px;height:20px;position:relative;"><div class="resource_str">CPU:{{total_resources.cpu_weight}}</div><div class="rounded bg-warning" style="width:{{cpu_percent}}%;height:20px"></div><div></td>
+        <td><div class="rounded bg-success" style="width:130px;height:20px;position:relative;"><div class="resource_str">NET:{{total_resources.net_weight}}</div><div class="rounded bg-warning" style="width:{{net_percent}}%;height:20px"></div><div></td>
+        <td><div class="rounded bg-success" style="width:130px;height:20px;position:relative;"><div class="resource_str">RAM:{{ram_usage}}/{{ram_quota}}</div>   <div class="rounded bg-warning" style="width:{{ram_percent}}%;height:20px"></div><div></td>
     </tr>
     <tr>
     <td colspan="4">
         <table>
             {{#permissions}}
             <tr class="table-warning">
-                <td>权限名称:{{perm_name}} 详细:{{required_auth_str}}</td>
+                <td>{{perm_name}}:{{required_auth_str}}</td>
             </tr>
             {{/permissions}}
         </table>
@@ -51,9 +51,13 @@
 </table>
     </script>
     <style type="text/css">
-        table {
+        .accounttable {
+            display: inline-block;
+            width: 600px;
         }
-
+        .resource_str{
+            position: absolute;
+        }
         td {
         }
     </style>
@@ -68,7 +72,7 @@
     var setEvtBalance = function (accountName) {
         $.ajax("/evt_balance?account=" + accountName, {
             success: function (arg) {
-                $("#" + accountName + "_evt").text("EVT余额：" + arg.result);
+                $("#" + accountName + "_evt").text("EVT:" + arg.result);
             }
         });
     };
@@ -84,17 +88,35 @@
                     account.cpu_percent = 100 * account.cpu_limit.used / account.cpu_limit.max;
                     account.net_percent = 100 * account.net_limit.used / account.net_limit.max;
                     account.ram_percent = 100 * account.ram_usage / account.ram_quota;
+                    account.total_resources.cpu_weight = account.total_resources.cpu_weight.replace(".0000", "");
+                    account.total_resources.net_weight = account.total_resources.net_weight.replace(".0000", "");
+                    if (account.account_name.indexOf("ico") != -1) {
+                        account.account_name_zh = "ICO收款账号";
+                    } else if (account.account_name.indexOf("mine") != -1) {
+                        account.account_name_zh = "挖矿合约账号";
+                    } else if (account.account_name.indexOf("game") != -1) {
+                        account.account_name_zh = "游戏合约账号";
+                    } else if (account.account_name.indexOf("admin") != -1) {
+                        account.account_name_zh = "管理账号";
+                    } else if (account.account_name.indexOf("token") != -1) {
+                        account.account_name_zh = "发币合约账号";
+                    } else if (account.account_name.indexOf("wallet") != -1) {
+                        account.account_name_zh = "团队钱包";
+                    } else if (account.account_name.indexOf("pro") != -1) {
+                        account.account_name_zh = "分红合约账号";
+                    }
                     for (var j = 0; j < account.permissions.length; j++) {
                         var permission = account.permissions[j];
                         var required_auth_str = "";
                         if (permission.required_auth.waits.length === 0 && permission.required_auth.threshold === 1) {
                             for (var k = 0; k < permission.required_auth.accounts.length; k++) {
                                 var permAccount = permission.required_auth.accounts[k];
-                                required_auth_str += "actor:" + permAccount.permission.actor + " , " + " permission: " + permAccount.permission.permission;
+                                required_auth_str += permAccount.permission.actor + "@" + permAccount.permission.permission;
                             }
                             for (var k = 0; k < permission.required_auth.keys.length; k++) {
                                 var permKey = permission.required_auth.keys[k];
-                                required_auth_str += "key:" + permKey.key;
+                                required_auth_str += permKey.key;
+                                // required_auth_str += permKey.key.substr(0, 18) + "...";
                             }
                         } else {
                             required_auth_str = JSON.stringify(permission.required_auth);
