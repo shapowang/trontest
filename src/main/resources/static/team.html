@@ -51,7 +51,27 @@
     </td>
     </tr>
 </table>
+
+
     </script>
+    <style type="text/css">
+        .accounttable {
+            display: inline-block;
+            width: 600px;
+        }
+
+        .resource_str {
+            position: absolute;
+        }
+
+        td {
+        }
+
+        #countDown{
+            text-align: center;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
 <div id="countDown">
@@ -60,7 +80,7 @@
 <div id="target" style="text-align: center">
     <h1 class="mx-auto align-middle">加载中，请稍候...</h1>
 </div>
-<a href="team.html" target="_blank">团队成员账号列表</a>
+<a href="index.html" target="_blank">项目账号列表</a>
 <script type="application/javascript">
     var template = $('#template').html();
     Mustache.parse(template);   // optional, speeds up future uses

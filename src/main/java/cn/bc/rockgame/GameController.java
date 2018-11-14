@@ -55,6 +55,24 @@ public class GameController {
         return httpResponseMessage;
     }
 
+    @RequestMapping("/teamaccounts")
+    @ResponseBody
+    public HttpResponseMessage teamaccounts() {
+        List<String> accountList = new ArrayList<>();
+        Set<String> strings = new HashSet<>(Arrays.asList("bichanwallet", "chaostesteos", "bichaintest5", "huwenzhi1234", "testvagas231"));
+        for (String account : strings) {
+            try {
+                accountList.add(Request.Post(NETWORK + "/v1/chain/get_account").bodyString(String.format("{\"account_name\":\"%s\"}", account), contentType).execute().returnContent().asString());
+            } catch (Exception e) {
+                LOGGER.error("exception:", e);
+            }
+        }
+        HttpResponseMessage httpResponseMessage = new HttpResponseMessage();
+        httpResponseMessage.setStatus(new BcStatus(200, "success"));
+        httpResponseMessage.setResult(accountList);
+        return httpResponseMessage;
+    }
+
     @RequestMapping("/evt_balance")
     @ResponseBody
     public HttpResponseMessage evtBalance(@RequestParam String account) throws IOException {

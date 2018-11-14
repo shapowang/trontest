@@ -1,0 +1,20 @@
+.accounttable {
+    display: inline-block;
+    width: 600px;
+}
+
+.resource_str {
+    position: absolute;
+}
+
+td {
+}
+
+#countDown {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+body {
+    text-align: center;
+}
