@@ -103,7 +103,7 @@ public class GameController {
             StringBuilder required_auth_str = new StringBuilder(permission.get("perm_name").asText() + ":");
             if (permission.get("required_auth").get("waits").size() == 0 && permission.get("required_auth").get("threshold").toString().equalsIgnoreCase("1")) {
                 JsonNode required_auth = permission.get("required_auth");
-                for (JsonNode jsonNode : required_auth.get("permissionMap")) {
+                for (JsonNode jsonNode : required_auth.get("accounts")) {
                     required_auth_str.append(jsonNode.get("permission").get("actor").asText()).append("@").append(jsonNode.get("permission").get("permission").asText());
                 }
                 for (JsonNode jsonNode : required_auth.get("keys")) {
