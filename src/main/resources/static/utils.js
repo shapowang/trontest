@@ -1,5 +1,13 @@
 function load() {
-    $.ajax((window.location.href.indexOf("team") === -1) ? "/accounts" : "teamaccounts", {
+    var path = "/accounts";
+    if (window.location.href.indexOf("team") !== -1) {
+        path = "/teamaccounts";
+    } else if (window.location.href.indexOf("alert") !== -1) {
+        path = "/alert";
+    }
+    var oldList = localStorage.getItem("additional_accounts");
+    path += "?accounts=" + (oldList ? oldList : "");
+    $.ajax(path, {
         success: function (arg) {
             var $target = $('#target');
             $target.empty();
@@ -72,4 +80,11 @@ function refresh() {
             load();
         }
     }, 1000);
+}
+
+function addAccountName() {
+    var name = $("#account_to_monitor").val();
+    var oldList = localStorage.getItem("additional_accounts");
+    localStorage.setItem("additional_accounts", oldList ? oldList + "," + name : name);
+    refresh();
 }

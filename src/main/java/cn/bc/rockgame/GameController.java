@@ -3,6 +3,7 @@ package cn.bc.rockgame;
 import com.aliyuncs.exceptions.ClientException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Splitter;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.ContentType;
 import org.slf4j.Logger;
@@ -40,9 +41,11 @@ public class GameController {
 
     @RequestMapping("/accounts")
     @ResponseBody
-    public HttpResponseMessage listAccounts() {
+    public HttpResponseMessage listAccounts(@RequestParam String accounts) {
         List<String> accountList = new ArrayList<>();
-        for (String account : permissionMap.keySet()) {
+        Set<String> stringSet = new HashSet<>(permissionMap.keySet());
+        stringSet.addAll(Splitter.on(",").omitEmptyStrings().trimResults().splitToList(accounts));
+        for (String account : stringSet) {
             try {
                 accountList.add(Request.Post(NETWORK + "/v1/chain/get_account").bodyString(String.format("{\"account_name\":\"%s\"}", account), contentType).execute().returnContent().asString());
             } catch (Exception e) {
@@ -57,9 +60,29 @@ public class GameController {
 
     @RequestMapping("/teamaccounts")
     @ResponseBody
-    public HttpResponseMessage teamaccounts() {
+    public HttpResponseMessage teamaccounts(@RequestParam String accounts) {
         List<String> accountList = new ArrayList<>();
         Set<String> strings = new HashSet<>(Arrays.asList("bichanwallet", "chaostesteos", "bichaintest5", "huwenzhi1234", "testvagas231"));
+        strings.addAll(Splitter.on(",").omitEmptyStrings().trimResults().splitToList(accounts));
+        for (String account : strings) {
+            try {
+                accountList.add(Request.Post(NETWORK + "/v1/chain/get_account").bodyString(String.format("{\"account_name\":\"%s\"}", account), contentType).execute().returnContent().asString());
+            } catch (Exception e) {
+                LOGGER.error("exception:", e);
+            }
+        }
+        HttpResponseMessage httpResponseMessage = new HttpResponseMessage();
+        httpResponseMessage.setStatus(new BcStatus(200, "success"));
+        httpResponseMessage.setResult(accountList);
+        return httpResponseMessage;
+    }
+
+
+    @RequestMapping("/alert")
+    @ResponseBody
+    public HttpResponseMessage alert() {
+        List<String> accountList = new ArrayList<>();
+        Set<String> strings = new HashSet<>(Arrays.asList("vagasico1111", "vagasminep11", "vagasprofi11", "vagasgame111"));
         for (String account : strings) {
             try {
                 accountList.add(Request.Post(NETWORK + "/v1/chain/get_account").bodyString(String.format("{\"account_name\":\"%s\"}", account), contentType).execute().returnContent().asString());
@@ -85,7 +108,7 @@ public class GameController {
         return httpResponseMessage;
     }
 
-    @Scheduled(fixedDelay = 10_000)
+    @Scheduled(fixedDelay = 60_000)
     public void permissionMonitor() {
         for (String account : permissionMap.keySet()) {
             try {
@@ -93,9 +116,9 @@ public class GameController {
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode jsonNode = objectMapper.readTree(json);
                 List<String> permissionList = getPermissionList(jsonNode.get("permissions"));
-                System.out.println(account);
+                LOGGER.info(account);
                 for (String s : permissionList) {
-                    System.out.println(s);
+                    LOGGER.info(s);
                 }
                 AccountPermission accountPermission = permissionMap.get(account);
                 if (!(permissionList.containsAll(accountPermission.getPermissionList()) && accountPermission.getPermissionList().containsAll(permissionList))) {
@@ -108,11 +131,10 @@ public class GameController {
     }
 
     private void alert(String account) throws ClientException {
-        String x = account + "权限发生变更，请立即检查";
-        System.err.println(x);
-        SmsUtil.sendSms("17335798599", x);
-        SmsUtil.sendSms("18811402254", x);
-        SmsUtil.sendSms("18511387625", x);
+        System.err.println(account + "权限发生变更");
+//        SmsUtil.sendSms("17335798599", account);
+//        SmsUtil.sendSms("18811402254", account);
+//        SmsUtil.sendSms("18511387625", account);
     }
 
     private List<String> getPermissionList(JsonNode permissions) {
