@@ -80,7 +80,7 @@ public class GameController {
 
     @RequestMapping("/alert")
     @ResponseBody
-    public HttpResponseMessage alert() {
+    public HttpResponseMessage alertPermission() {
         List<String> accountList = new ArrayList<>();
         Set<String> strings = new HashSet<>(Arrays.asList("vagasico1111", "vagasminep11", "vagasprofi11", "vagasgame111"));
         for (String account : strings) {
@@ -122,7 +122,17 @@ public class GameController {
                 }
                 AccountPermission accountPermission = permissionMap.get(account);
                 if (!(permissionList.containsAll(accountPermission.getPermissionList()) && accountPermission.getPermissionList().containsAll(permissionList))) {
-                    alert(account);
+                    System.err.println(account + "权限发生变更");
+                    batchSend(account, "SMS_151085033");
+                }
+                if (jsonNode.get("cpu_limit").get("used").asDouble() / jsonNode.get("cpu_limit").get("used").asDouble() > 0.9) {
+                    alertResource(account, "cpu");
+                }
+                if (jsonNode.get("net_limit").get("used").asDouble() / jsonNode.get("net_limit").get("used").asDouble() > 0.9) {
+                    alertResource(account, "net");
+                }
+                if (jsonNode.get("ram_usage").asDouble() / jsonNode.get("ram_quota").asDouble() < 0.9) {
+                    alertResource(account, "ram");
                 }
             } catch (Exception e) {
                 LOGGER.error("exception:", e);
@@ -130,11 +140,25 @@ public class GameController {
         }
     }
 
-    private void alert(String account) throws ClientException {
-        System.err.println(account + "权限发生变更");
-//        SmsUtil.sendSms("17335798599", account);
-//        SmsUtil.sendSms("18811402254", account);
-//        SmsUtil.sendSms("18511387625", account);
+    private void alertResource(String account, String resourceName) {
+        System.err.println(account + resourceName + "不足");
+        batchSend(account, "SMS_151177708");
+    }
+
+
+    private static void batchSend(String account, String code) {
+        try {
+            SmsUtil.sendSms("17335798599", account, code);
+            SmsUtil.sendSms("18811402254", account, code);
+            SmsUtil.sendSms("18511387625", account, code);
+        } catch (ClientException e) {
+            LOGGER.error("excep:", e);
+        }
+    }
+
+    @Scheduled(fixedDelay = 7200_000)
+    public void healthReport() {
+//        batchSend("", "SMS_151232585");
     }
 
     private List<String> getPermissionList(JsonNode permissions) {

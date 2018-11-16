@@ -24,7 +24,7 @@ public class SmsUtil {
     static final String accessKeySecret = "RLyE2Si2xslb5sVu7qtNnTWhdsWkvG";
 
 
-    public static SendSmsResponse sendSms(String phone, String account) throws ClientException {
+    public static SendSmsResponse sendSms(String phone, String param, String code) throws ClientException {
         //可自助调整超时时间
         System.setProperty("sun.net.client.defaultConnectTimeout", "10000");
         System.setProperty("sun.net.client.defaultReadTimeout", "10000");
@@ -39,10 +39,10 @@ public class SmsUtil {
         //必填:短信签名-可在短信控制台中找到
         request.setSignName("小重山科技");
         //必填:短信模板-可在短信控制台中找到
-        request.setTemplateCode("SMS_151085033");
+        request.setTemplateCode(code);
         //可选:模板中的变量替换JSON串,如模板内容为"亲爱的${name},您的验证码为${account}"时,此处的值为
-        if (!StringUtils.isEmpty(account)) {
-            request.setTemplateParam("{\"account\":\"" + account + "\"}");
+        if (!StringUtils.isEmpty(param)) {
+            request.setTemplateParam("{\"account\":\"" + param + "\"}");
         }
         //可选:outId为提供给业务方扩展字段,最终在短信回执消息中将此值带回给调用者
         request.setOutId("yourOutId");
