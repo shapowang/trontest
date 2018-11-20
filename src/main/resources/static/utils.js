@@ -1,3 +1,5 @@
+eosnetwork = "jungle";
+
 function load() {
     var path = "/accounts";
     if (window.location.href.indexOf("team") !== -1) {
@@ -6,7 +8,7 @@ function load() {
         path = "/alert";
     }
     var oldList = localStorage.getItem("additional_accounts");
-    path += "?accounts=" + (oldList ? oldList : "");
+    path += "?network=" + eosnetwork + "&" + "accounts=" + (oldList ? oldList : "");
     $.ajax(path, {
         success: function (arg) {
             var $target = $('#target');
@@ -66,7 +68,7 @@ function load() {
 }
 
 function setEvtBalance(accountName) {
-    $.ajax("/evt_balance?account=" + accountName, {
+    $.ajax("/evt_balance?account=" + accountName + "&network=" + eosnetwork, {
         success: function (arg) {
             $("#" + accountName + "_evt").text("EVT:" + arg.result);
         }
@@ -92,6 +94,11 @@ function addAccountName() {
         localStorage.setItem("additional_accounts", oldList ? oldList + "," + name : name);
         load();
     }
+    $.toast({
+        text: "添加成功，请等待数据加载完成~",
+        textAlign: "center",
+        position: "top-center"
+    });
 }
 
 function removeLocal(accountName) {
@@ -102,4 +109,9 @@ function removeLocal(accountName) {
     }
     localStorage.setItem("additional_accounts", oldList);
     $("#" + accountName + "_node").remove();
+}
+
+function changeNetwork(network) {
+    eosnetwork = network;
+    load();
 }

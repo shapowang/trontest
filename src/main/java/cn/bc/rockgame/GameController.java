@@ -26,7 +26,6 @@ import java.util.*;
 public class GameController {
     private static final Logger LOGGER = LoggerFactory.getLogger(GameController.class);
     public static final ContentType contentType = ContentType.create("application/json", "utf-8");
-    public static final String NETWORK = "http://jungle.cryptolions.io:18888";
     private static Map<String, AccountPermission> permissionMap = new HashMap<>();
 
     static {
@@ -41,13 +40,13 @@ public class GameController {
 
     @RequestMapping("/accounts")
     @ResponseBody
-    public HttpResponseMessage listAccounts(@RequestParam String accounts) {
+    public HttpResponseMessage listAccounts(@RequestParam String network, @RequestParam String accounts) {
         List<String> accountList = new ArrayList<>();
         Set<String> stringSet = new HashSet<>(permissionMap.keySet());
         stringSet.addAll(Splitter.on(",").omitEmptyStrings().trimResults().splitToList(accounts));
         for (String account : stringSet) {
             try {
-                accountList.add(Request.Post(NETWORK + "/v1/chain/get_account").bodyString(String.format("{\"account_name\":\"%s\"}", account), contentType).execute().returnContent().asString());
+                accountList.add(Request.Post(getNetwork(network) + "/v1/chain/get_account").bodyString(String.format("{\"account_name\":\"%s\"}", account), contentType).execute().returnContent().asString());
             } catch (Exception e) {
                 LOGGER.error("exception:", e);
             }
@@ -60,13 +59,13 @@ public class GameController {
 
     @RequestMapping("/teamaccounts")
     @ResponseBody
-    public HttpResponseMessage teamaccounts(@RequestParam String accounts) {
+    public HttpResponseMessage teamaccounts(@RequestParam String network, @RequestParam String accounts) {
         List<String> accountList = new ArrayList<>();
         Set<String> strings = new HashSet<>(Arrays.asList("bichanwallet", "chaostesteos", "bichaintest5", "huwenzhi1234", "testvagas231"));
         strings.addAll(Splitter.on(",").omitEmptyStrings().trimResults().splitToList(accounts));
         for (String account : strings) {
             try {
-                accountList.add(Request.Post(NETWORK + "/v1/chain/get_account").bodyString(String.format("{\"account_name\":\"%s\"}", account), contentType).execute().returnContent().asString());
+                accountList.add(Request.Post(getNetwork(network) + "/v1/chain/get_account").bodyString(String.format("{\"account_name\":\"%s\"}", account), contentType).execute().returnContent().asString());
             } catch (Exception e) {
                 LOGGER.error("exception:", e);
             }
@@ -80,12 +79,12 @@ public class GameController {
 
     @RequestMapping("/alert")
     @ResponseBody
-    public HttpResponseMessage alertPermission() {
+    public HttpResponseMessage alertPermission(@RequestParam String network, @RequestParam String accounts) {
         List<String> accountList = new ArrayList<>();
         Set<String> strings = new HashSet<>(Arrays.asList("vagasico1111", "vagasminep11", "vagasprofi11", "vagasgame111"));
         for (String account : strings) {
             try {
-                accountList.add(Request.Post(NETWORK + "/v1/chain/get_account").bodyString(String.format("{\"account_name\":\"%s\"}", account), contentType).execute().returnContent().asString());
+                accountList.add(Request.Post(getNetwork(network) + "/v1/chain/get_account").bodyString(String.format("{\"account_name\":\"%s\"}", account), contentType).execute().returnContent().asString());
             } catch (Exception e) {
                 LOGGER.error("exception:", e);
             }
@@ -96,10 +95,22 @@ public class GameController {
         return httpResponseMessage;
     }
 
+    private String getNetwork(String network) {
+        switch (network) {
+            case "mainnet":
+                return "https://geo.eosasia.one";
+            case "jungle":
+                return "http://jungle.cryptolions.io:18888";
+            case "kylin":
+                return "https://api-kylin.eosasia.one";
+        }
+        return "";
+    }
+
     @RequestMapping("/evt_balance")
     @ResponseBody
-    public HttpResponseMessage evtBalance(@RequestParam String account) throws IOException {
-        String url = NETWORK + "/v1/chain/get_currency_balance";
+    public HttpResponseMessage evtBalance(@RequestParam String network, @RequestParam String account) throws IOException {
+        String url = getNetwork(network) + "/v1/chain/get_currency_balance";
         String string = Request.Post(url).bodyString(String.format("{\"account\":\"%s\",\"code\":\"vagastoken11\",\"symbol\":\"EVT\"}", account), contentType).execute().returnContent().asString();
         HttpResponseMessage httpResponseMessage = new HttpResponseMessage();
         httpResponseMessage.setStatus(new BcStatus(200, "success"));
@@ -112,7 +123,7 @@ public class GameController {
     public void permissionMonitor() {
         for (String account : permissionMap.keySet()) {
             try {
-                String json = Request.Post(NETWORK + "/v1/chain/get_account").bodyString(String.format("{\"account_name\":\"%s\"}", account), contentType).execute().returnContent().asString();
+                String json = Request.Post(getNetwork("mainnet") + "/v1/chain/get_account").bodyString(String.format("{\"account_name\":\"%s\"}", account), contentType).execute().returnContent().asString();
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode jsonNode = objectMapper.readTree(json);
                 List<String> permissionList = getPermissionList(jsonNode.get("permissions"));

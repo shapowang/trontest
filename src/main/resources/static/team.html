@@ -21,6 +21,8 @@
             crossorigin="anonymous"></script>
     <script type="application/javascript" src="mustache.js"></script>
     <script type="application/javascript" src="utils.js"></script>
+    <script type="application/javascript" src="jquery.toast.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="jquery.toast.min.css">
     <link rel="stylesheet" type="text/css" href="rock.css">
     <script id="template" type="x-tmpl-mustache">
         <div class="wrapper" id="{{account_name}}_node">
@@ -59,24 +61,6 @@
 </table>
 </div>
     </script>
-    <style type="text/css">
-        .accounttable {
-            display: inline-block;
-            width: 600px;
-        }
-
-        .resource_str {
-            position: absolute;
-        }
-
-        td {
-        }
-
-        #countDown{
-            text-align: center;
-            margin-bottom: 10px;
-        }
-    </style>
 </head>
 <body>
 <div id="countDown">
@@ -90,6 +74,11 @@
     <input type="button" id="account_to_monitor_btn" onclick="addAccountName()" value="添加到监控列表">
 </div>
 <a href="index.html" target="_blank">项目账号列表</a>
+<div class="networkwrapper" style="text-align: center">
+    <button type="button" id="mainnetBtn" class="btn btn-primary" onclick="changeNetwork('mainnet')">主网</button>
+    <button type="button" id="jungleBtn" class="btn btn-primary" onclick="changeNetwork('jungle')">Jungle测试网</button>
+    <button type="button" id="kylinBtn" class="btn btn-primary" onclick="changeNetwork('kylin')">Kylin测试网</button>
+</div>
 <script type="application/javascript">
     var template = $('#template').html();
     Mustache.parse(template);   // optional, speeds up future uses
