@@ -125,13 +125,13 @@ public class GameController {
                     System.err.println(account + "权限发生变更");
                     batchSend(account, "SMS_151085033");
                 }
-                if (jsonNode.get("cpu_limit").get("used").asDouble() / jsonNode.get("cpu_limit").get("used").asDouble() > 0.9) {
+                if (jsonNode.get("cpu_limit").get("used").asDouble() / jsonNode.get("cpu_limit").get("max").asDouble() > 0.9) {
                     alertResource(account, "cpu");
                 }
-                if (jsonNode.get("net_limit").get("used").asDouble() / jsonNode.get("net_limit").get("used").asDouble() > 0.9) {
+                if (jsonNode.get("net_limit").get("used").asDouble() / jsonNode.get("net_limit").get("max").asDouble() > 0.9) {
                     alertResource(account, "net");
                 }
-                if (jsonNode.get("ram_usage").asDouble() / jsonNode.get("ram_quota").asDouble() < 0.9) {
+                if (jsonNode.get("ram_usage").asDouble() / jsonNode.get("ram_quota").asDouble() > 0.9) {
                     alertResource(account, "ram");
                 }
             } catch (Exception e) {

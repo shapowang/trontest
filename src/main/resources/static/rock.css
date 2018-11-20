@@ -18,3 +18,13 @@ td {
 body {
     text-align: center;
 }
+
+.wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.wrapper button {
+    position: absolute;
+    right: 5px;
+}

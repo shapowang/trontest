@@ -23,6 +23,12 @@
     <script type="application/javascript" src="utils.js"></script>
     <link rel="stylesheet" type="text/css" href="rock.css">
     <script id="template" type="x-tmpl-mustache">
+    <div class="wrapper" id="{{account_name}}_node">
+    {{#localAdd}}
+    <button type="button" class="close" aria-label="Close" onclick="removeLocal('{{account_name}}')">
+    <span aria-hidden="true">&times;</span>
+    </button>
+    {{/localAdd}}
     <table class="accounttable table table-hover table-responsive table-sm border border-success" style="border:0;padding:0;margin:0">
     <tr>
         <td colspan="2">{{account_name_zh}}</td>
@@ -50,7 +56,8 @@
         </table>
     </td>
     </tr>
-</table>
+    </table>
+    </div>
     </script>
 </head>
 <body>

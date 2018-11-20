@@ -53,6 +53,9 @@ function load() {
                     }
                     permission.required_auth_str = required_auth_str;
                 }
+                if (localStorage.getItem("additional_accounts").indexOf(account.account_name) !== -1) {
+                    account.localAdd = true;
+                }
                 var rendered = Mustache.render(template, account);
                 $target.append(rendered);
                 console.log(account);
@@ -85,6 +88,18 @@ function refresh() {
 function addAccountName() {
     var name = $("#account_to_monitor").val();
     var oldList = localStorage.getItem("additional_accounts");
-    localStorage.setItem("additional_accounts", oldList ? oldList + "," + name : name);
-    refresh();
+    if (oldList.indexOf(name) === -1) {
+        localStorage.setItem("additional_accounts", oldList ? oldList + "," + name : name);
+        load();
+    }
+}
+
+function removeLocal(accountName) {
+    var oldList = localStorage.getItem("additional_accounts");
+    if (oldList) {
+        oldList = oldList.replace(accountName + ",", "");
+        oldList = oldList.replace(accountName, "");
+    }
+    localStorage.setItem("additional_accounts", oldList);
+    $("#" + accountName + "_node").remove();
 }
