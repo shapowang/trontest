@@ -191,4 +191,12 @@ public class GameController {
         }
         return stringList;
     }
+
+    @Scheduled(fixedDelay = 8640000)
+    private void getKylinEOS() throws IOException {
+        for (String account : permissionMap.keySet()) {
+            String resp = Request.Get("http://faucet.cryptokylin.io/get_token?vagasgamea11" + account).execute().returnContent().asString();
+            LOGGER.error("excep:", resp);
+        }
+    }
 }

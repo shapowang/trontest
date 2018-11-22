@@ -4,87 +4,212 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-
-    <title>vagas monitor</title>
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <title>DAPPKiller：DAPP账号资源列表和监控预警</title>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
-            integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
-            crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
-            integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
-            crossorigin="anonymous"></script>
-    <script type="application/javascript" src="mustache.js"></script>
-    <script type="application/javascript" src="utils.js"></script>
-    <script type="application/javascript" src="jquery.toast.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="jquery.toast.min.css">
-    <link rel="stylesheet" type="text/css" href="rock.css">
+    <script type="application/javascript" src="js/utils.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/index.css">
     <script id="template" type="x-tmpl-mustache">
-    <div class="wrapper" id="{{account_name}}_node">
-    {{#localAdd}}
-    <button type="button" class="close" aria-label="Close" onclick="removeLocal('{{account_name}}')">
-    <span aria-hidden="true">&times;</span>
-    </button>
-    {{/localAdd}}
-    <table class="accounttable table table-hover table-responsive table-sm border border-success" style="border:0;padding:0;margin:0">
-    <tr>
-        <td colspan="2">{{account_name_zh}}</td>
-        <td colspan="2"><a target="_blank" href="https://jungle.bloks.io/account/{{account_name}}">{{account_name}}</a></td>
-    </tr>
-    <tr>
-        <td>{{core_liquid_balance}}</td>
-        <td id="{{account_name}}_evt">{{evt_balance}}</td>
-        <!--<td>EOS转账:1次</td>-->
-        <!--<td>EVT转账:2次</td>-->
-    </tr>
-    <tr>
-        <td><div class="rounded bg-success" style="width:130px;height:20px;position:relative;"><div class="resource_str">CPU:{{total_resources.cpu_weight}}</div><div class="rounded bg-warning" style="width:{{cpu_percent}}%;height:20px"></div><div></td>
-        <td><div class="rounded bg-success" style="width:130px;height:20px;position:relative;"><div class="resource_str">NET:{{total_resources.net_weight}}</div><div class="rounded bg-warning" style="width:{{net_percent}}%;height:20px"></div><div></td>
-        <td><div class="rounded bg-success" style="width:130px;height:20px;position:relative;"><div class="resource_str">RAM:{{ram_usage}}/{{ram_quota}}</div>   <div class="rounded bg-warning" style="width:{{ram_percent}}%;height:20px"></div><div></td>
-    </tr>
-    <tr>
-    <td colspan="4">
-        <table>
-            {{#permissions}}
-            <tr class="table-warning">
-                <td>{{perm_name}}:{{required_auth_str}}</td>
-            </tr>
-            {{/permissions}}
-        </table>
-    </td>
-    </tr>
-    </table>
-    </div>
     </script>
 </head>
 <body>
-<div id="countDown">
-
-</div>
-<div id="target" style="text-align: center">
-    <h1 class="mx-auto align-middle">加载中，请稍候...</h1>
-</div>
-<div>
-    <input type="text" id="account_to_monitor">
-    <input type="button" id="account_to_monitor_btn" onclick="addAccountName()" value="添加到监控列表">
-</div>
-<a href="team.html" target="_blank">团队成员账号列表</a>
-<a href="alert.html" target="_blank">权限监控列表</a>
-<div class="networkwrapper" style="text-align: center">
-<button type="button" id="mainnetBtn" class="btn btn-primary" onclick="changeNetwork('mainnet')">主网</button>
-<button type="button" id="jungleBtn" class="btn btn-primary" onclick="changeNetwork('jungle')">Jungle测试网</button>
-<button type="button" id="kylinBtn" class="btn btn-primary" onclick="changeNetwork('kylin')">Kylin测试网</button>
-</div>
 <script type="application/javascript">
-    var template = $('#template').html();
-    Mustache.parse(template);   // optional, speeds up future uses
-    $(load);
-    refresh();
+    // var template = $('#template').html();
+    // Mustache.parse(template);
+    // $(load);
+    // refresh();
 </script>
+<div class="homeContainer">
+    <header>
+        <div class="headBox">
+            <div class="logoBox"></div>
+            <div class="headMain"><h2>DAPP列表，这里可以查看DAPP合约账号剩余挖矿币数、团队账号持仓等，也可以监控DAPP的权限、运算资源、资产，并订阅报警短信</h2></div>
+            <div class="headerBtnsBox">
+                <button type="button" class="el-button el-button--primary" onclick="showWXGroup()"><span><i class="iconfont icon-shequ"></i>社区</span></button>
+            </div>
+        </div>
+    </header>
+    <section data-v-3821aa5a="" class="homeMainBox">
+        <div data-v-3821aa5a="" class="el-tabs el-tabs--top">
+            <div class="el-tabs__header is-top">
+                <div class="el-tabs__nav-wrap is-top">
+                    <div class="el-tabs__nav-scroll">
+                        <div role="tablist" class="el-tabs__nav is-top" style="transform: translateX(0px);">
+                            <div class="el-tabs__active-bar is-top" style="width: 154px; transform: translateX(0px);"></div>
+                            <div id="tab-all" aria-controls="pane-all" role="tab" aria-selected="true" tabindex="0" class="el-tabs__item is-top is-active"><span data-v-3821aa5a=""><i
+                                    data-v-3821aa5a=""
+                                    class="iconfont icon-all"></i> All Dapps</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="el-tabs__content">
+                <div data-v-3821aa5a="" role="tabpanel" id="pane-all" aria-labelledby="tab-all" class="el-tab-pane">
+                    <div data-v-3821aa5a="" class="el-pagination is-background">
+                        <button type="button" class="btn-prev" disabled="disabled"><span class="waves-effect waves-button waves-float">Previous</span></button>
+                        <ul class="el-pager">
+                            <li class="number active">1</li><!---->
+                        </ul>
+                        <button type="button" class="btn-next"><span class="waves-effect waves-button waves-float">Next</span></button>
+                    </div>
+                    <div data-v-3821aa5a="" class="el-table dappTableBox el-table--fit el-table--enable-row-hover" style="width: 100%;">
+                        <div class="hidden-columns">
+                            <div data-v-3821aa5a=""></div>
+                            <div data-v-3821aa5a=""></div>
+                            <div data-v-3821aa5a=""></div>
+                            <div data-v-3821aa5a=""></div>
+                            <div data-v-3821aa5a=""></div>
+                            <div data-v-3821aa5a=""></div>
+                            <div data-v-3821aa5a=""></div>
+                            <div data-v-3821aa5a=""></div>
+                            <div data-v-3821aa5a=""></div>
+                        </div>
+                        <div class="el-table__header-wrapper">
+                            <table cellspacing="0" cellpadding="0" border="0" class="el-table__header">
+                                <colgroup>
+                                    <col name="el-table_1_column_1" width="71">
+                                    <col name="el-table_1_column_2" width="148">
+                                    <col name="el-table_1_column_3" width="125">
+                                    <col name="el-table_1_column_4" width="170">
+                                    <col name="el-table_1_column_5" width="125">
+                                    <col name="el-table_1_column_6" width="125">
+                                    <col name="el-table_1_column_7" width="125">
+                                    <col name="el-table_1_column_8" width="125">
+                                    <col name="el-table_1_column_9" width="125">
+                                    <col name="gutter" width="0">
+                                </colgroup>
+                                <thead class="has-gutter">
+                                <tr class="">
+                                    <th colspan="1" rowspan="1" class="el-table_1_column_1   firstColumnTd  is-leaf is-sortable">
+                                        <div class="cell">#<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div>
+                                    </th>
+                                    <th colspan="1" rowspan="1" class="el-table_1_column_2   appNameTd  is-leaf is-sortable">
+                                        <div class="cell">名称<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div>
+                                    </th>
+                                    <th colspan="1" rowspan="1" class="el-table_1_column_3   categoryTd  is-leaf is-sortable">
+                                        <div class="cell">类别<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div>
+                                    </th>
+                                    <th colspan="1" rowspan="1" class="el-table_1_column_4   profitRateTd  is-leaf is-sortable">
+                                        <div class="cell">收益率<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div>
+                                    </th>
+                                    <th colspan="1" rowspan="1" class="el-table_1_column_5     is-leaf is-sortable">
+                                        <div class="cell">币价<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div>
+                                    </th>
+                                    <th colspan="1" rowspan="1" class="el-table_1_column_6     is-leaf is-sortable">
+                                        <div class="cell">挖矿成本<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div>
+                                    </th>
+                                    <th colspan="1" rowspan="1" class="el-table_1_column_7     is-leaf is-sortable">
+                                        <div class="cell">用户24h<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div>
+                                    </th>
+                                    <th colspan="1" rowspan="1" class="el-table_1_column_8     is-leaf is-sortable">
+                                        <div class="cell">成交量24h<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div>
+                                    </th>
+                                    <th colspan="1" rowspan="1" class="el-table_1_column_9     is-leaf is-sortable">
+                                        <div class="cell">交易24h<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div>
+                                    </th>
+                                    <th class="gutter" style="width: 0px; display: none;"></th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                        <div class="el-table__body-wrapper is-scrolling-none">
+                            <table cellspacing="0" cellpadding="0" border="0" class="el-table__body">
+                                <colgroup>
+                                    <col name="el-table_1_column_1" width="71">
+                                    <col name="el-table_1_column_2" width="148">
+                                    <col name="el-table_1_column_3" width="125">
+                                    <col name="el-table_1_column_4" width="170">
+                                    <col name="el-table_1_column_5" width="125">
+                                    <col name="el-table_1_column_6" width="125">
+                                    <col name="el-table_1_column_7" width="125">
+                                    <col name="el-table_1_column_8" width="125">
+                                    <col name="el-table_1_column_9" width="125">
+                                </colgroup>
+                                <tbody>
+                                <tr class="el-table__row">
+                                    <td rowspan="1" colspan="1" class="el-table_1_column_1  firstColumnTd">
+                                        <div class="cell"><!----> <i data-v-3821aa5a="" class="sortBadge sortFirst"></i></div>
+                                    </td>
+                                    <td rowspan="1" colspan="1" class="el-table_1_column_2  appNameTd">
+                                        <div class="cell"><a data-v-3821aa5a="" href="http://47.94.172.117:10000/eosfinger/#/eosfinger" target="_blank"><span data-v-3821aa5a="">VAGAS Game</span></a>
+                                        </div>
+                                    </td>
+                                    <td rowspan="1" colspan="1" class="el-table_1_column_3  categoryTd">
+                                        <div class="cell"><span data-v-3821aa5a="" class="appCategoryTd cateType1">博彩</span></div>
+                                    </td>
+                                    <td rowspan="1" colspan="1" class="el-table_1_column_4  profitRateTd">
+                                        <div class="cell"><!----> <span data-v-3821aa5a="" class="higher"><span data-v-3821aa5a="">+</span>147.92%</span>
+                                            <button data-v-3821aa5a="" type="button" class="el-button el-button--success" onclick="window.open('dapp.html','_blank')">
+                                                <span>
+                                                <i data-v-3821aa5a="" class="iconfont icon-chuizi"></i>
+                                                <span data-v-3821aa5a="">监控权限</span>
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td rowspan="1" colspan="1" class="el-table_1_column_5  ">
+                                        <div class="cell">
+                                            <div data-v-3821aa5a=""><i data-v-3821aa5a="" class="iconfont icon-eos"></i><span data-v-3821aa5a=""></span></div>
+                                        </div>
+                                    </td>
+                                    <td rowspan="1" colspan="1" class="el-table_1_column_6  ">
+                                        <div class="cell">
+                                            <div data-v-3821aa5a=""><i data-v-3821aa5a="" class="iconfont icon-eos"></i><span data-v-3821aa5a="">0.000048</span></div>
+                                        </div>
+                                    </td>
+                                    <td rowspan="1" colspan="1" class="el-table_1_column_7  ">
+                                        <div class="cell">
+                                            <div data-v-3821aa5a=""><span data-v-3821aa5a="">518</span></div>
+                                            <span data-v-3821aa5a="" class="higher"><span data-v-3821aa5a="">+</span> <span data-v-3821aa5a="">62.89%</span></span></div>
+                                    </td>
+                                    <td rowspan="1" colspan="1" class="el-table_1_column_8  ">
+                                        <div class="cell">
+                                            <div data-v-3821aa5a=""><i data-v-3821aa5a="" class="iconfont icon-eos"></i><span data-v-3821aa5a="">165,258</span></div>
+                                            <span data-v-3821aa5a="" class="higher"><span data-v-3821aa5a="">+</span> <span data-v-3821aa5a="">51.85%</span></span></div>
+                                    </td>
+                                    <td rowspan="1" colspan="1" class="el-table_1_column_9  ">
+                                        <div class="cell">129,804</div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="el-table__column-resize-proxy" style="display: none;"></div>
+                    </div>
+                    <div data-v-3821aa5a="" class="el-pagination is-background">
+                        <button type="button" class="btn-prev" disabled="disabled"><span class="waves-effect waves-button waves-float">Previous</span></button>
+                        <ul class="el-pager">
+                            <li class="number active">1</li><!---->
+                        </ul>
+                        <button type="button" class="btn-next"><span class="waves-effect waves-button waves-float">Next</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="el-loading-mask" style="display: none;">
+            <div class="el-loading-spinner">
+                <svg viewBox="25 25 50 50" class="circular">
+                    <circle cx="50" cy="50" r="20" fill="none" class="path"></circle>
+                </svg><!----></div>
+        </div>
+    </section>
+    <footer>
+        <div class="footerTop">
+            <div class="logoBox"></div>
+        </div>
+        <div class="links">
+            <a href="javascript:;"><i class="iconfont icon-twiter"></i></a>
+            <a href="javascript:;"><i class="iconfont icon-telegram"></i></a>
+            <a href="javascript:;"><i class="iconfont icon-facebook2"></i></a>
+        </div>
+    </footer>
+    <div class="pcCodeBox" style="display: none;">
+        <div>
+            <!--<div class="codeImgDiv"><img src="img/WechatIMG2.png"></div>-->
+            <p style="margin-top:400px">微信客服:fanfeipeng000</p>
+            <p>telegram:EOS VAGAS_china</p>
+        </div>
+    </div>
+</div>
 </body>
 </html>

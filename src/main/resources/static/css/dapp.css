@@ -7,9 +7,6 @@
     position: absolute;
 }
 
-td {
-}
-
 #countDown {
     text-align: center;
     margin-bottom: 10px;
@@ -27,4 +24,8 @@ body {
 .wrapper button {
     position: absolute;
     right: 5px;
+}
+
+.projectName{
+
 }

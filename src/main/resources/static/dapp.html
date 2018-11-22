@@ -19,13 +19,13 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
             integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
             crossorigin="anonymous"></script>
-    <script type="application/javascript" src="mustache.js"></script>
-    <script type="application/javascript" src="utils.js"></script>
-    <script type="application/javascript" src="jquery.toast.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="jquery.toast.min.css">
-    <link rel="stylesheet" type="text/css" href="rock.css">
+    <script type="application/javascript" src="js/mustache.js"></script>
+    <script type="application/javascript" src="js/utils.js"></script>
+    <script type="application/javascript" src="js/jquery.toast.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/jquery.toast.min.css">
+    <link rel="stylesheet" type="text/css" href="css/dapp.css">
     <script id="template" type="x-tmpl-mustache">
-        <div class="wrapper" id="{{account_name}}_node">
+    <div class="wrapper" id="{{account_name}}_node">
     {{#localAdd}}
     <button type="button" class="close" aria-label="Close" onclick="removeLocal('{{account_name}}')">
     <span aria-hidden="true">&times;</span>
@@ -34,7 +34,7 @@
     <table class="accounttable table table-hover table-responsive table-sm border border-success" style="border:0;padding:0;margin:0">
     <tr>
         <td colspan="2">{{account_name_zh}}</td>
-        <td colspan="2"><a target="_blank" href="https://jungle.bloks.io/account/{{account_name}}">{{account_name}}</a></td>
+        <td colspan="2"><a target="_blank" href="{{network_account_url}}{{account_name}}">{{account_name}}</a></td>
     </tr>
     <tr>
         <td>{{core_liquid_balance}}</td>
@@ -58,14 +58,23 @@
         </table>
     </td>
     </tr>
-</table>
-</div>
+    </table>
+    </div>
     </script>
 </head>
 <body>
+<div class="networkwrapper" style="text-align: center">
+    <button type="button" id="mainnetBtn" class="btn btn-primary" onclick="changeNetwork('mainnet')">EOS主网</button>
+    <button type="button" id="jungleBtn" class="btn btn-primary" onclick="changeNetwork('jungle')">Jungle测试网</button>
+    <button type="button" id="kylinBtn" class="btn btn-primary" onclick="changeNetwork('kylin')">Kylin测试网</button>
+    <button type="button" id="vagasteamBtn" class="btn btn-primary" onclick="changeRequestProject('vagasteam')">VAGAS团队账号列表</button>
+    <button type="button" id="vagasAlertBtn" class="btn btn-primary" onclick="changeRequestProject('vagasAlert')">VAGAS监控账号列表</button>
+    <button type="button" id="vagasGameBtn" class="btn btn-primary" onclick="open('http://47.94.172.117:10000/eosfinger/#/eosfinger','_blank')">VAGAS游戏</button>
+</div>
 <div id="countDown">
 
 </div>
+<h2 id="projectName"></h2>
 <div id="target" style="text-align: center">
     <h1 class="mx-auto align-middle">加载中，请稍候...</h1>
 </div>
@@ -73,15 +82,9 @@
     <input type="text" id="account_to_monitor">
     <input type="button" id="account_to_monitor_btn" onclick="addAccountName()" value="添加到监控列表">
 </div>
-<a href="index.html" target="_blank">项目账号列表</a>
-<div class="networkwrapper" style="text-align: center">
-    <button type="button" id="mainnetBtn" class="btn btn-primary" onclick="changeNetwork('mainnet')">主网</button>
-    <button type="button" id="jungleBtn" class="btn btn-primary" onclick="changeNetwork('jungle')">Jungle测试网</button>
-    <button type="button" id="kylinBtn" class="btn btn-primary" onclick="changeNetwork('kylin')">Kylin测试网</button>
-</div>
 <script type="application/javascript">
     var template = $('#template').html();
-    Mustache.parse(template);   // optional, speeds up future uses
+    Mustache.parse(template);
     $(load);
     refresh();
 </script>

@@ -1,10 +1,12 @@
 eosnetwork = "jungle";
+projectName = "";
+network_account_url = "https://jungle.bloks.io/account/";
 
 function load() {
     var path = "/accounts";
-    if (window.location.href.indexOf("team") !== -1) {
+    if (projectName === "team") {
         path = "/teamaccounts";
-    } else if (window.location.href.indexOf("alert") !== -1) {
+    } else if (projectName === "alert") {
         path = "/alert";
     }
     var oldList = localStorage.getItem("additional_accounts");
@@ -48,16 +50,16 @@ function load() {
                         for (var k = 0; k < permission.required_auth.keys.length; k++) {
                             var permKey = permission.required_auth.keys[k];
                             required_auth_str += permKey.key;
-                            // required_auth_str += permKey.key.substr(0, 18) + "...";
                         }
                     } else {
                         required_auth_str = JSON.stringify(permission.required_auth);
                     }
                     permission.required_auth_str = required_auth_str;
                 }
-                if (localStorage.getItem("additional_accounts").indexOf(account.account_name) !== -1) {
+                if (localStorage.getItem("additional_accounts") !== null && localStorage.getItem("additional_accounts").indexOf(account.account_name) !== -1) {
                     account.localAdd = true;
                 }
+                account.network_account_url = network_account_url;
                 var rendered = Mustache.render(template, account);
                 $target.append(rendered);
                 console.log(account);
@@ -113,5 +115,23 @@ function removeLocal(accountName) {
 
 function changeNetwork(network) {
     eosnetwork = network;
+    if (eosnetwork === "mainnet") {
+        network_account_url = "https://www.bloks.io/account/";
+    } else if (eosnetwork === "kylin") {
+        network_account_url = "https://tools.cryptokylin.io/#/tx/";
+    } else if (eosnetwork === "jungle") {
+        network_account_url = "https://jungle.bloks.io/account/";
+    }
     load();
+}
+
+function changeRequestProject(name) {
+    projectName = name;
+}
+
+function showWXGroup() {
+    $(".pcCodeBox").css('display', 'block');
+    $(".pcCodeBox").click(function () {
+        $(".pcCodeBox").css('display', 'none');
+    })
 }
