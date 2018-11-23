@@ -81,6 +81,10 @@
 <div>
     <input type="text" id="account_to_monitor">
     <input type="button" id="account_to_monitor_btn" onclick="addAccountName()" value="添加到监控列表">
+    <div id="summary">
+        总计RAM数量:<a id="totalRAM"></a>
+        总计EOS数量:<a id="totalEOS"></a>
+    </div>
 </div>
 <script type="application/javascript">
     var template = $('#template').html();

@@ -1,4 +1,4 @@
-eosnetwork = "jungle";
+eosnetwork = "mainnet";
 projectName = "";
 network_account_url = "https://jungle.bloks.io/account/";
 
@@ -16,20 +16,35 @@ function load() {
             var $target = $('#target');
             $target.empty();
             console.log(arg);
+            var totalRam = 0;
+            var totalEOS = 0;
             for (var i = 0; i < arg.result.length; i++) {
                 var account = JSON.parse(arg.result[i]);
-                // account.balance = parseFloat(account.core_liquid_balance) + parseFloat(account.self_delegated_bandwidth.cpu_weight) + parseFloat(account.self_delegated_bandwidth.net_weight);
+                if (account.core_liquid_balance !== undefined && account.core_liquid_balance !== null) {
+                    totalEOS += parseFloat(account.core_liquid_balance);
+                }
+                if (account.self_delegated_bandwidth !== undefined && account.self_delegated_bandwidth !== null) {
+                    totalEOS += parseFloat(account.self_delegated_bandwidth.cpu_weight);
+                    totalEOS += parseFloat(account.self_delegated_bandwidth.net_weight);
+                }
+                if (account.refund_request !== undefined && account.refund_request !== null) {
+                    totalEOS += parseFloat(account.refund_request.net_amount);
+                    totalEOS += parseFloat(account.refund_request.cpu_amount);
+                }
                 account.cpu_percent = 100 * account.cpu_limit.used / account.cpu_limit.max;
                 account.net_percent = 100 * account.net_limit.used / account.net_limit.max;
                 account.ram_percent = 100 * account.ram_usage / account.ram_quota;
+                totalRam += account.ram_quota;
                 account.total_resources.cpu_weight = account.total_resources.cpu_weight.replace(".0000", "");
                 account.total_resources.net_weight = account.total_resources.net_weight.replace(".0000", "");
                 if (account.account_name.indexOf("ico") != -1) {
                     account.account_name_zh = "ICO收款账号";
                 } else if (account.account_name.indexOf("mine") != -1) {
                     account.account_name_zh = "挖矿合约账号";
-                } else if (account.account_name.indexOf("game") != -1) {
+                } else if (account.account_name.indexOf("game111") != -1) {
                     account.account_name_zh = "石头剪刀布游戏合约账号";
+                } else if (account.account_name.indexOf("gamea11") != -1) {
+                    account.account_name_zh = "FOMO游戏合约账号";
                 } else if (account.account_name.indexOf("admin") != -1) {
                     account.account_name_zh = "管理账号";
                 } else if (account.account_name.indexOf("token") != -1) {
@@ -38,6 +53,8 @@ function load() {
                     account.account_name_zh = "团队钱包";
                 } else if (account.account_name.indexOf("pro") != -1) {
                     account.account_name_zh = "分红合约账号";
+                } else if (account.account_name.indexOf("team") != -1) {
+                    account.account_name_zh = "团队锁仓合约账号";
                 }
                 for (var j = 0; j < account.permissions.length; j++) {
                     var permission = account.permissions[j];
@@ -65,6 +82,9 @@ function load() {
                 console.log(account);
                 setEvtBalance(account.account_name);
             }
+            $("#totalRAM").text(totalRam);
+            //https://bloks.io/account/vagasadmin11,cpu stake to other
+            $("#totalEOS").text(totalEOS + totalRam * 0.072 / 1000 + 16);
         }
     });
 }

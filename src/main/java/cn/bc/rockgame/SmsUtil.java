@@ -25,6 +25,9 @@ public class SmsUtil {
 
 
     public static SendSmsResponse sendSms(String phone, String param, String code) throws ClientException {
+        if(true) {
+            return null;
+        }
         //可自助调整超时时间
         System.setProperty("sun.net.client.defaultConnectTimeout", "10000");
         System.setProperty("sun.net.client.defaultReadTimeout", "10000");

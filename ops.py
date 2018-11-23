@@ -11,8 +11,8 @@ if sys.argv[1] == "b18":
 elif sys.argv[1] == "dp":
     os.system("""
     mvn clean package -Dmaven.test.skip=true
-    ssh root@39.107.115.88 "cd /opt/Service/rockgame;../kill_process_by_keyword.sh rockgame;mkdir -p backup;cp rockgame-0.0.1-SNAPSHOT.jar backup/rockgame-0.0.1-SNAPSHOT.jar`date "+%Y-%m-%d%H:%M:%S"`"
-    scp target/rockgame-0.0.1-SNAPSHOT.jar root@39.107.115.88:/opt/Service/rockgame/rockgame-0.0.1-SNAPSHOT.jar
+    ssh root@47.75.112.246 "cd /opt/Service/rockgame;../kill_process_by_keyword.sh rockgame;mkdir -p backup;cp rockgame-0.0.1-SNAPSHOT.jar backup/rockgame-0.0.1-SNAPSHOT.jar`date "+%Y-%m-%d%H:%M:%S"`"
+    scp target/rockgame-0.0.1-SNAPSHOT.jar root@47.75.112.246:/opt/Service/rockgame/rockgame-0.0.1-SNAPSHOT.jar
     mvn clean
-    ssh root@39.107.115.88 "cd /opt/Service/rockgame;./start.sh"
+    ssh root@47.75.112.246 "cd /opt/Service/rockgame;./start.sh"
     """)

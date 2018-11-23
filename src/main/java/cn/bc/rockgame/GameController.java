@@ -29,13 +29,15 @@ public class GameController {
     private static Map<String, AccountPermission> permissionMap = new HashMap<>();
 
     static {
-        permissionMap.put("vagasico1111", new AccountPermission(Arrays.asList("active:vagasico1111@eosio.code", "owner:EOS5th5A9doz6fQPCoQrJvuZcFjZTZkAww4KqD4jjWDBg9LMnhJXn")));
-        permissionMap.put("vagasminep11", new AccountPermission(Arrays.asList("active:vagasminep11@eosio.code", "mine:vagasgame111@eosio.code", "owner:EOS8FAZ1m6QQ8xLuZ2ZRQLZQehsJ2Jkt11Pkd8tuzq9hY29s4vufJ")));
-        permissionMap.put("vagasprofi11", new AccountPermission(Arrays.asList("active:vagasprofi11@eosio.code", "owner:EOS7yfoeSB87JraMtEu6D8YaRme6mSB9dHWhVVVyBgN8MjsawGx67", "profit:EOS7kZo7ynM9cZWoeMu4UqAieHafVNw2wxiuuP3Trg3wiSziKPX9N")));
-        permissionMap.put("vagasgame111", new AccountPermission(Arrays.asList("active:vagasgame111@eosio.code", "owner:EOS6aRL2KwdTTHGhqTWdpvJigCNcYyrxjbT5XZ3d2RKuLc6XF6dK2")));
-        permissionMap.put("vagasadmin11", new AccountPermission(Arrays.asList("active:EOS5d9poJXy6y2xZujQPWp1nsTvLYybygexfZJFcDHxjBrbA9kMHM", "owner:EOS5uinq76fwmg56D5mNgHh26MwQvedcf7by7wZja3FJAFvVsRTCh")));
-        permissionMap.put("vagastoken11", new AccountPermission(Arrays.asList("active:EOS7qqZRptBFXRzeby871hxJBe776HvcgSTjAckS9C4eFZCBTnfkP", "owner:EOS6DQkgRecaa1q9fmJu7qKe26stHERDvYMb4xBHG6o1LX82j4RnP")));
-        permissionMap.put("vagaswallet1", new AccountPermission(Arrays.asList("active:EOS5rtwkvGfx68eHLzLyqdr9oKb1DCZrTHaZfWS3mrxr8i3ixf5tf", "owner:EOS6zwxxwMScPunHvjR7mgH71hpAPd1WVirgcKjwWJawg1MhdP662")));
+        permissionMap.put("vagasico1111", new AccountPermission(Arrays.asList("active:vagasico1111@eosio.code", "owner:EOS7CHqLhz5eTJdKZnKk4YPX382YH8Zd2k31oexBL5teTddvubUKN")));
+        permissionMap.put("vagasminep11", new AccountPermission(Arrays.asList("active:vagasminep11@eosio.code", "mine:vagasgame111@eosio.code", "owner:EOS6Zbx3iFmU4Urd7Shjtfkz1aRHnkRmG1gy8mCszYHKCaeczgnxu")));
+        permissionMap.put("vagasprofi11", new AccountPermission(Arrays.asList("active:vagasprofi11@eosio.code", "owner:EOS6REwZ5hY2dFtz3pUqTw9MNjCn6F1v5ZbBvQVQ3qdov7mde1HP1", "profit:EOS7xb6jqwKgCb8Q2JJ2kAyst4vcDBAZUwdKsNrsdr9Q1ZhTA1SFf")));
+        permissionMap.put("vagasgame111", new AccountPermission(Arrays.asList("active:vagasgame111@eosio.code", "owner:EOS7k3bYA6Fut6Gs6xJhnruEnzFiHqMkNauSdy7rRFKELc626qreh")));
+        permissionMap.put("vagasgamea11", new AccountPermission(Arrays.asList("active:vagasgamea11@eosio.code", "owner:EOS5PU1wAhmZgo7RDFpo9dRWhRfa5VcqjQx8AEQBAEkH4nnE7eSCV")));
+        permissionMap.put("vagasadmin11", new AccountPermission(Arrays.asList("active:EOS7xb6jqwKgCb8Q2JJ2kAyst4vcDBAZUwdKsNrsdr9Q1ZhTA1SFf", "owner:EOS6g41GvL8k67pPgx4YStzEuPNRScc7YToAajGg5boPgoyCXYe44")));
+        permissionMap.put("vagastoken11", new AccountPermission(Arrays.asList("active:EOS6aEvQUDNWR6LL94n15TTnmMmCBtH76n7MCyGpih8a2qetDp3tg", "owner:EOS7K2TG28TryG3zJq6iwF1777cH5KRbyd25CJZoTWfr22hjPbtck")));
+        permissionMap.put("vagaswallet1", new AccountPermission(Arrays.asList("active:EOS7Mtt9N1dCquBJncwFc1tw1Z6yegCGpSwbw8Usk2w7yx79PpojC", "owner:EOS7Mtt9N1dCquBJncwFc1tw1Z6yegCGpSwbw8Usk2w7yx79PpojC")));
+        permissionMap.put("vagasteam111", new AccountPermission(Arrays.asList("active:vagasteam111@eosio.code","mineprogress:vagasminep11@eosio.code","owner:EOS7buFMudM4XoBRMzVNnHb9jF7vxYTxVJCbBHcokAqM5VsBsfzo2")));
     }
 
     @RequestMapping("/accounts")
@@ -81,7 +83,7 @@ public class GameController {
     @ResponseBody
     public HttpResponseMessage alertPermission(@RequestParam String network, @RequestParam String accounts) {
         List<String> accountList = new ArrayList<>();
-        Set<String> strings = new HashSet<>(Arrays.asList("vagasico1111", "vagasminep11", "vagasprofi11", "vagasgame111"));
+        Set<String> strings = new HashSet<>(permissionMap.keySet());
         for (String account : strings) {
             try {
                 accountList.add(Request.Post(getNetwork(network) + "/v1/chain/get_account").bodyString(String.format("{\"account_name\":\"%s\"}", account), contentType).execute().returnContent().asString());
@@ -156,12 +158,21 @@ public class GameController {
         batchSend(account, "SMS_151177708");
     }
 
+    public static final Map<String, Integer> countMap = new HashMap<>();
 
     private static void batchSend(String account, String code) {
         try {
             SmsUtil.sendSms("17335798599", account, code);
             SmsUtil.sendSms("18811402254", account, code);
             SmsUtil.sendSms("18511387625", account, code);
+            if (!countMap.containsKey(code)) {
+                countMap.put(code, 1);
+            } else {
+                countMap.put(code, countMap.get(code) + 1);
+            }
+            if (countMap.get(code) > 2) {
+                return;
+            }
         } catch (ClientException e) {
             LOGGER.error("excep:", e);
         }
@@ -195,7 +206,7 @@ public class GameController {
     @Scheduled(fixedDelay = 8640000)
     private void getKylinEOS() throws IOException {
         for (String account : permissionMap.keySet()) {
-            String resp = Request.Get("http://faucet.cryptokylin.io/get_token?vagasgamea11" + account).execute().returnContent().asString();
+            String resp = Request.Get("http://faucet.cryptokylin.io/get_token?" + account).execute().returnContent().asString();
             LOGGER.error("excep:", resp);
         }
     }
