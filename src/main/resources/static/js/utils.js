@@ -1,6 +1,6 @@
 eosnetwork = "mainnet";
 projectName = "";
-network_account_url = "https://jungle.bloks.io/account/";
+network_account_url = "https://eosflare.io/account/";
 
 function load() {
     var path = "/accounts";
@@ -18,6 +18,7 @@ function load() {
             console.log(arg);
             var totalRam = 0;
             var totalEOS = 0;
+            var totalResource = 0;
             for (var i = 0; i < arg.result.length; i++) {
                 var account = JSON.parse(arg.result[i]);
                 if (account.core_liquid_balance !== undefined && account.core_liquid_balance !== null) {
@@ -31,10 +32,12 @@ function load() {
                     totalEOS += parseFloat(account.refund_request.net_amount);
                     totalEOS += parseFloat(account.refund_request.cpu_amount);
                 }
-                account.cpu_percent = 100 * account.cpu_limit.used / account.cpu_limit.max;
-                account.net_percent = 100 * account.net_limit.used / account.net_limit.max;
-                account.ram_percent = 100 * account.ram_usage / account.ram_quota;
+                account.cpu_percent = Math.min(100 * account.cpu_limit.used / account.cpu_limit.max, 100);
+                account.net_percent = Math.min(100 * account.net_limit.used / account.net_limit.max, 100);
+                account.ram_percent = Math.min(100 * account.ram_usage / account.ram_quota, 100);
                 totalRam += account.ram_quota;
+                totalResource += parseFloat(account.total_resources.cpu_weight.replace(" EOS", ""));
+                totalResource += parseFloat(account.total_resources.net_weight.replace(" EOS", ""));
                 account.total_resources.cpu_weight = account.total_resources.cpu_weight.replace(".0000", "");
                 account.total_resources.net_weight = account.total_resources.net_weight.replace(".0000", "");
                 if (account.account_name.indexOf("ico") != -1) {
@@ -83,8 +86,7 @@ function load() {
                 setEvtBalance(account.account_name);
             }
             $("#totalRAM").text(totalRam);
-            //https://bloks.io/account/vagasadmin11,cpu stake to other
-            $("#totalEOS").text(totalEOS + totalRam * 0.072 / 1000 + 16);
+            $("#totalEOS").text(totalEOS + totalResource + totalRam * 0.0634 / 1000);
         }
     });
 }
