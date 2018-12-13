@@ -166,6 +166,11 @@ public class GameController {
         }
     }
 
+    @RequestMapping("/testblacklist")
+    public void testBlackList(@RequestParam String account) {
+        addToBlackList(account);
+    }
+
     public static final int SAME = 0;
     public static final int USER_WIN = 1;
     public static final int GAME_WIN = -1;
@@ -197,7 +202,7 @@ public class GameController {
     private static void addToBlackList(String player) {
         try {
             LOGGER.error("add user:{} to blacklist", player);
-            Process process = Runtime.getRuntime().exec(String.format("cleos -u https://geo.eosasia.one push action vagasgame111 addb '[\"%s\"]' -p vagasgame111@bl", player));
+            Process process = Runtime.getRuntime().exec(String.format("cd ~;./unlock.sh;cleos -u https://geo.eosasia.one push action vagasgame111 addb '[\"%s\"]' -p vagasgame111@bl", player));
             System.out.println(process.getOutputStream());
         } catch (IOException e) {
             LOGGER.error("excep:", e);
