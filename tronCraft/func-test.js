@@ -7,12 +7,18 @@ const HttpProvider = TronWeb.providers.HttpProvider;
 let fullNode;
 let solidityNode;
 let eventServer;
+let processEnv = {
+    dev: "testnet",
+    dice: "TCY2squ2SubQLyn76h3K7EgM8FThwnSyEE",
+    token: "TJEH8xmvGHZLsgxiEizLftLfDBKB6hckas",
+    slots: "THZqhWzTAzRUxb6J5knqUqZxurZG7C3qjz"
+};
 
-if (process.env.dev == 'local'){
-    fullNode = new HttpProvider('http://127.0.0.1:8090'); 
+if (processEnv.dev == 'local') {
+    fullNode = new HttpProvider('http://127.0.0.1:8090');
     solidityNode = new HttpProvider('http://127.0.0.1:8091');
     eventServer = 'http://127.0.0.1:8092';
-}else if (process.env.dev == 'testnet'){
+} else if (processEnv.dev == 'testnet') {
     fullNode = new HttpProvider('https://api.shasta.trongrid.io');
     solidityNode = new HttpProvider('https://api.shasta.trongrid.io');
     eventServer = 'https://api.shasta.trongrid.io';
@@ -25,13 +31,13 @@ const craftTokenAbi = token.abi;
 
 
 //address
-const craftDiceAddr = process.env.dice;
-const craftSlotsAddr = process.env.slots;
-const craftTokenAddr = process.env.token;
+const craftDiceAddr = processEnv.dice;
+const craftSlotsAddr = processEnv.slots;
+const craftTokenAddr = processEnv.token;
 
 
-const userKey = "9fd2c9810f7b9eeb056a08bb5e4d4b1ffaf5f2e88f90cc101dc7b7cae133129b";
-const userAddr = "TXFHDxkTG67L96DLAuqtyJdLZW3nDA3WP1"; //用户
+const userKey = "ecf8b21fb49c20851f85d66e9f51ff2f56248a9af6bb9456cece36186782e473";
+const userAddr = "TNx43yPrp5mitcnTwUmcVgpuRK7GniAhJT"; //用户
 
 
 const tronWeb = new TronWeb(
@@ -44,7 +50,7 @@ const tronWeb = new TronWeb(
 let tIdArray = {};
 
 //monitor or res
-var monitor = process.env.monitor;
+var monitor = processEnv.monitor;
 
 async function updateMinerAddr() {
     let craftDice = await tronWeb.contract(craftDiceAbi, craftDiceAddr);
@@ -59,7 +65,6 @@ async function updateMinerAddr() {
 async function bet() {
     let craftDice = await tronWeb.contract(craftDiceAbi, craftDiceAddr);
     let craftToken = await tronWeb.contract(craftTokenAbi, craftTokenAddr);
-
     console.log("掷骰子：用户开始下注TRX");
     let balance = await tronWeb.trx.getBalance(userAddr);
     console.log('用户下注前TRX:', tronWeb.fromSun(balance));
@@ -68,21 +73,25 @@ async function bet() {
     // let approveCFT = await craftToken.allowance(cftMinerAddr,craftDiceAddr).call();
     // console.log("掷骰子合约被授权平台币数量：",approveCFT.toNumber());
     let result;
-    if(monitor == 0){
-        result = await craftDice.bet(5).send({
+    if (monitor == 0) {
+        result = await craftDice.bet(80).send({
             callValue: tronWeb.toSun(210),
             shouldPollResponse: true
+        }).catch(function (err) {
+            console.log(err);
+            process.exit();
         });
         console.log("掷骰子TRX下注：", result);
-    }else {
-        result = await craftDice.bet(5).send({
+    } else {
+        result = await craftDice.bet(80).send({
             callValue: tronWeb.toSun(210)
+        }).catch(function (err) {
+            console.log(err);
+            process.exit();
         });
         console.log("掷骰子TRX下注：", result);
         tIdArray._bet = result;
     }
-
-
     balance = await tronWeb.trx.getBalance(userAddr);
     console.log('用户下注后TRX:', tronWeb.fromSun(balance));
     cft = await craftToken.balanceOf(userAddr).call();
@@ -102,22 +111,28 @@ async function betSlots() {
 
     var stakeArray = [0, 0, tronWeb.toSun(1), 0, 0, tronWeb.toSun(1), 0];
     var bitRecord = "0,0,1,0,0,1,0";
-    
+
     let result;
-    if(monitor == 0){
-        result = await craftSlots.bet(stakeArray,bitRecord).send({
+    if (monitor == 0) {
+        result = await craftSlots.bet(stakeArray, bitRecord).send({
             callValue: tronWeb.toSun(2),
             shouldPollResponse: true
+        }).catch(function (err) {
+            console.log(err);
+            process.exit();
         });
         console.log("水果机TRX下注：", result);
         console.log("下注结果-索引", result._randType.toNumber());
         console.log("下注结果", result._res);
-    }else {
-        result = await craftSlots.bet(stakeArray,bitRecord).send({
+    } else {
+        result = await craftSlots.bet(stakeArray, bitRecord).send({
             callValue: tronWeb.toSun(2)
+        }).catch(function (err) {
+            console.log(err);
+            process.exit();
         });
         console.log("水果机TRX下注：", result);
-        tIdArray._betSlots = result;  
+        tIdArray._betSlots = result;
     }
 
 
@@ -137,16 +152,22 @@ async function betByCFT() {
     let cft = await craftToken.balanceOf(userAddr).call();
     console.log('用户下注前CFT:', tronWeb.fromSun(cft.toNumber()));
     cft = await craftToken.balanceOf(craftDiceAddr).call();
-    console.log("掷骰子合约下注前CFT:",tronWeb.fromSun(cft.toNumber()));
+    console.log("掷骰子合约下注前CFT:", tronWeb.fromSun(cft.toNumber()));
 
     let result;
-    if(monitor == 0){
+    if (monitor == 0) {
         result = await craftDice.betByCFT(30, tronWeb.toSun(1)).send({
             shouldPollResponse: true
+        }).catch(function (err) {
+            console.log(err);
+            process.exit();
         });
         console.log("掷骰子CFT下注：", result);
-    }else {
-        result = await craftDice.betByCFT(30, tronWeb.toSun(1)).send({});
+    } else {
+        result = await craftDice.betByCFT(30, tronWeb.toSun(1)).send({}).catch(function (err) {
+            console.log(err);
+            process.exit();
+        });
         console.log("掷骰子CFT下注：", result);
         tIdArray._betByCFT = result;
     }
@@ -156,7 +177,7 @@ async function betByCFT() {
     cft = await craftToken.balanceOf(userAddr).call();
     console.log('用户下注后CFT:', tronWeb.fromSun(cft.toNumber()));
     cft = await craftToken.balanceOf(craftDiceAddr).call();
-    console.log("掷骰子合约下注后CFT:",tronWeb.fromSun(cft.toNumber()));
+    console.log("掷骰子合约下注后CFT:", tronWeb.fromSun(cft.toNumber()));
 
 }
 
@@ -170,22 +191,22 @@ async function betSlotsByCFT() {
     let cft = await craftToken.balanceOf(userAddr).call();
     console.log('用户下注前CFT:', tronWeb.fromSun(cft.toNumber()));
     cft = await craftToken.balanceOf(craftSlotsAddr).call();
-    console.log("水果机合约下注前CFT:",tronWeb.fromSun(cft.toNumber()));
+    console.log("水果机合约下注前CFT:", tronWeb.fromSun(cft.toNumber()));
 
     var stakeArray = [0, 0, tronWeb.toSun(10), 0, 0, tronWeb.toSun(10), 0];
     var bitRecord = "0,0,10,0,0,10,0";
     let result;
-    if(monitor == 0) {
-        result = await craftSlots.betByCFT(tronWeb.toSun(20), stakeArray,bitRecord).send({
+    if (monitor == 0) {
+        result = await craftSlots.betByCFT(tronWeb.toSun(20), stakeArray, bitRecord).send({
             shouldPollResponse: true
         });
         console.log("水果机CFT下注：", result);
         console.log("下注结果-索引：", result._randType.toNumber());
         console.log("下注结果：", result._res);
-    }else {
-        result = await craftSlots.betByCFT(tronWeb.toSun(20), stakeArray,bitRecord).send({});
+    } else {
+        result = await craftSlots.betByCFT(tronWeb.toSun(20), stakeArray, bitRecord).send({});
         console.log("水果机CFT下注：", result);
-        tIdArray._betSlotsByCFT = result; 
+        tIdArray._betSlotsByCFT = result;
     }
 
 
@@ -194,7 +215,7 @@ async function betSlotsByCFT() {
     cft = await craftToken.balanceOf(userAddr).call();
     console.log('用户下注后CFT:', tronWeb.fromSun(cft.toNumber()));
     cft = await craftToken.balanceOf(craftSlotsAddr).call();
-    console.log("水果机合约下注后CFT:",tronWeb.fromSun(cft.toNumber()));
+    console.log("水果机合约下注后CFT:", tronWeb.fromSun(cft.toNumber()));
 }
 
 var bet_ = false;
@@ -243,9 +264,9 @@ async function startEventListener() {
 async function statTx(id) {
     let msg = await tronWeb.trx.getTransactionInfo(id);
     let len;
-    if(msg.internal_transactions !=null) {
+    if (msg.internal_transactions != null) {
         len = msg.internal_transactions.length;
-    }else {
+    } else {
         len = 0;
     }
     console.log("fee:" + tronWeb.fromSun(msg.fee) + "\t跨合约调用次数:" + len + "\t带宽fee：" + tronWeb.fromSun(msg.receipt.net_fee) + "\tEnergy fee:" + tronWeb.fromSun(msg.receipt.energy_fee) + "\tEnergy总消耗：" + msg.receipt.energy_usage_total
@@ -253,7 +274,7 @@ async function statTx(id) {
 }
 
 async function record() {
-    if(bet_ && betSlot_ && betByCFT_ && betSlotByCFT_) {
+    if (bet_ && betSlot_ && betByCFT_ && betSlotByCFT_) {
         console.log("--------统计数据--------");
         console.log("掷骰子TRX下注：=====");
         await statTx(tIdArray._bet);
@@ -263,8 +284,8 @@ async function record() {
         await statTx(tIdArray._betSlots);
         console.log("水果机CFT下注：=====");
         await statTx(tIdArray._betSlotsByCFT);
-        console.log("--------finish---------");   
-    }else {
+        console.log("--------finish---------");
+    } else {
         setTimeout(async () => {
             await record();
         }, 5000);
@@ -272,6 +293,7 @@ async function record() {
 }
 
 startEventListener();
+
 async function mainJS() {
     console.log("-------掷骰子游戏-------");
     await bet();
@@ -282,14 +304,11 @@ async function mainJS() {
     await betSlots();
     console.log("-----------------------");
     await betSlotsByCFT();
-    if(monitor != 0){
+    if (monitor != 0) {
         await record();
-    }else {
-       console.log("--------finish---------");   
+    } else {
+        console.log("--------finish---------");
     }
 }
+
 mainJS();
-
-
-
-

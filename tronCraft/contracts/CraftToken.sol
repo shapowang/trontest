@@ -25,7 +25,7 @@ contract CraftToken is ERC20, ERC20Detailed, ERC20Pausable, ERC20Burnable, ERC20
 
 
     function transferFromByCraft(address userAddr, address craftAddr, uint256 value, uint256 bonus) public onlyContracter returns (bool) {
-        require(bonus < balanceOf(craftAddr), "Greater than contract cft");
+        require(bonus < balanceOf(craftAddr), "bonus greater than game contract token count");
         _transfer(userAddr, craftAddr, value);
         return true;
     }

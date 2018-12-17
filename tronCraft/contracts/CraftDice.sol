@@ -8,8 +8,8 @@ import "./openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
 contract CraftDice is Ownable {
     using SafeMath for uint256;
-    //挖矿总量
-    uint256 constant CAPMININGTOKEN = 5600000000;
+    //挖矿总量 5600
+    uint256 constant CAP_MINING_TOKEN = 5600000000;
     uint256 constant MININGREWARD = 10;
     uint256 constant MININGFALLOFF = 1;
     uint256 constant DECIMALS = 6;
@@ -64,7 +64,7 @@ contract CraftDice is Ownable {
     event LogBetByCFT(address indexed userAddr, uint256 betMoney, uint256 bonus, uint256 num, uint256 randNum, bool res, uint256 timeStamp);
 
     function curCFTReward() public view returns (uint256) {
-        uint256 curMiningToken = CAPMININGTOKEN.sub(craftToken.balanceOf(minerCFTAddr).div(10 ** DECIMALS));
+        uint256 curMiningToken = CAP_MINING_TOKEN.sub(craftToken.balanceOf(minerCFTAddr).div(10 ** DECIMALS));
         if (curMiningToken < 600000000) {
             return MININGREWARD;
         } else if (curMiningToken < 1600000000) {
@@ -75,18 +75,20 @@ contract CraftDice is Ownable {
             return MININGREWARD - MININGFALLOFF * 3;
         } else if (curMiningToken < 4600000000) {
             return MININGREWARD - MININGFALLOFF * 4;
-        } else if (curMiningToken < CAPMININGTOKEN) {
+        } else if (curMiningToken < CAP_MINING_TOKEN) {
             return MININGREWARD - MININGFALLOFF * 5;
         } else {
             return 0;
         }
     }
 
-    function bet(uint256 num) payable public returns (uint256 _randNum, bool _res){
+    function bet(uint256 num) payable public returns (uint256 _randNum, bool _res, uint256 difficulty, uint256 blockstamp){
         require(num >= 4 && num <= 96);
         require(msg.value > 0);
         // rand num
-        uint256 randNum = uint256(sha256(abi.encodePacked(block.difficulty, msg.sender))) % 100 + 1;
+        difficulty = block.difficulty;
+        blockstamp = block.timestamp;
+        uint256 randNum = uint256(sha256(abi.encodePacked(difficulty, msg.sender, blockstamp))) % 100 + 1;
         //distributed CFT
         uint256 cftReward = curCFTReward().mul(msg.value).div(10);
         craftToken.transferFrom(minerCFTAddr, msg.sender, cftReward);

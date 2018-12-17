@@ -2,8 +2,7 @@ var CraftToken = artifacts.require("./CraftToken.sol");
 var CraftDice = artifacts.require("./CraftDice.sol");
 var CraftSlots = artifacts.require("./CraftSlots.sol");
 
-var cftMinerAddr = "TFgtTUfbhavDJRarPv4GF8CwRBSWURrecD";
-var tokenAddr = "";
+var cftMinerAddr = "TVdX435jKc6KjoYYdTF4ZjiHizj14U4LX6";
 
 module.exports = function (deployer) {
     deployer.deploy(CraftToken, "CraftToken", "CFT", 6, "10000000000000000").then(function () {

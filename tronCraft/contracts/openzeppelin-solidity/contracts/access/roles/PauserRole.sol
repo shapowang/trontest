@@ -3,41 +3,42 @@ pragma solidity ^0.4.23;
 import "../Roles.sol";
 
 contract PauserRole {
-  using Roles for Roles.Role;
+    using Roles for Roles.Role;
 
-  event PauserAdded(address indexed account);
-  event PauserRemoved(address indexed account);
+    event PauserAdded(address indexed account);
 
-  Roles.Role private pausers;
+    event PauserRemoved(address indexed account);
 
-  constructor() internal {
-    _addPauser(msg.sender);
-  }
+    Roles.Role private pausers;
 
-  modifier onlyPauser() {
-    require(isPauser(msg.sender));
-    _;
-  }
+    constructor() internal {
+        _addPauser(msg.sender);
+    }
 
-  function isPauser(address account) public view returns (bool) {
-    return pausers.has(account);
-  }
+    modifier onlyPauser() {
+        require(isPauser(msg.sender));
+        _;
+    }
 
-  function addPauser(address account) public onlyPauser {
-    _addPauser(account);
-  }
+    function isPauser(address account) public view returns (bool) {
+        return pausers.has(account);
+    }
 
-  function renouncePauser() public {
-    _removePauser(msg.sender);
-  }
+    function addPauser(address account) public onlyPauser {
+        _addPauser(account);
+    }
 
-  function _addPauser(address account) internal {
-    pausers.add(account);
-    emit PauserAdded(account);
-  }
+    function renouncePauser() public {
+        _removePauser(msg.sender);
+    }
 
-  function _removePauser(address account) internal {
-    pausers.remove(account);
-    emit PauserRemoved(account);
-  }
+    function _addPauser(address account) internal {
+        pausers.add(account);
+        emit PauserAdded(account);
+    }
+
+    function _removePauser(address account) internal {
+        pausers.remove(account);
+        emit PauserRemoved(account);
+    }
 }

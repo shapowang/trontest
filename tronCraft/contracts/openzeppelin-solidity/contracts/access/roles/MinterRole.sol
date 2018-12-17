@@ -3,41 +3,42 @@ pragma solidity ^0.4.23;
 import "../Roles.sol";
 
 contract MinterRole {
-  using Roles for Roles.Role;
+    using Roles for Roles.Role;
 
-  event MinterAdded(address indexed account);
-  event MinterRemoved(address indexed account);
+    event MinterAdded(address indexed account);
 
-  Roles.Role private minters;
+    event MinterRemoved(address indexed account);
 
-  constructor() internal {
-    _addMinter(msg.sender);
-  }
+    Roles.Role private minters;
 
-  modifier onlyMinter() {
-    require(isMinter(msg.sender));
-    _;
-  }
+    constructor() internal {
+        _addMinter(msg.sender);
+    }
 
-  function isMinter(address account) public view returns (bool) {
-    return minters.has(account);
-  }
+    modifier onlyMinter() {
+        require(isMinter(msg.sender));
+        _;
+    }
 
-  function addMinter(address account) public onlyMinter {
-    _addMinter(account);
-  }
+    function isMinter(address account) public view returns (bool) {
+        return minters.has(account);
+    }
 
-  function renounceMinter() public {
-    _removeMinter(msg.sender);
-  }
+    function addMinter(address account) public onlyMinter {
+        _addMinter(account);
+    }
 
-  function _addMinter(address account) internal {
-    minters.add(account);
-    emit MinterAdded(account);
-  }
+    function renounceMinter() public {
+        _removeMinter(msg.sender);
+    }
 
-  function _removeMinter(address account) internal {
-    minters.remove(account);
-    emit MinterRemoved(account);
-  }
+    function _addMinter(address account) internal {
+        minters.add(account);
+        emit MinterAdded(account);
+    }
+
+    function _removeMinter(address account) internal {
+        minters.remove(account);
+        emit MinterRemoved(account);
+    }
 }

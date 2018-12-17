@@ -1,0 +1,11 @@
+nvm install v11.4.0
+
+tronbox migrate --network shasta --reset
+
+npm install -g tronbox@2.2.3-prev.0
+
+npm install -g tronbox
+
+http://www.bejson.com/convert/ox2str/
+
+1.

@@ -116,20 +116,18 @@ contract CraftSlots is Ownable {
     }
 
     function betByCFT(uint256 _cftAmount, uint256[7] _stakeArray, string _bitRecord) isSumOk(_stakeArray, _cftAmount) public returns (uint256 _randType, bool _res){
-        uint256 cm = _cftAmount;
         uint256 randNum = uint256(sha256(abi.encodePacked(block.difficulty, msg.sender))) % 24;
         uint256 curType = order[randNum];
-
         //distributed bonus
         if (_stakeArray[curType] != 0) {
             uint256 bonus = odds[curType].mul(_stakeArray[curType]).div(100);
-            require(craftToken.transferFromByCraft(msg.sender, address(this), cm, bonus));
+            require(craftToken.transferFromByCraft(msg.sender, address(this), _cftAmount, bonus));
             craftToken.transfer(msg.sender, bonus);
-            emit LogSlotsByCFT(msg.sender, cm, _bitRecord, curType, bonus, true, now);
+            emit LogSlotsByCFT(msg.sender, _cftAmount, _bitRecord, curType, bonus, true, now);
             _res = true;
         } else {
-            require(craftToken.transferFromByCraft(msg.sender, address(this), cm, 0));
-            emit LogSlotsByCFT(msg.sender, cm, _bitRecord, curType, 0, false, now);
+            require(craftToken.transferFromByCraft(msg.sender, address(this), _cftAmount, 0));
+            emit LogSlotsByCFT(msg.sender, _cftAmount, _bitRecord, curType, 0, false, now);
             _res = false;
         }
         _randType = randNum;
