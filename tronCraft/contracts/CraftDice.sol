@@ -13,6 +13,72 @@ contract CraftDice is Ownable {
     uint256 constant MININGREWARD = 10;
     uint256 constant MININGFALLOFF = 1;
     uint256 constant DECIMALS = 6;
+    /*投注点列表*/
+    uint256 constant SMALL = 1;//小
+    uint256 constant ODD = 2;//单
+    uint256 constant EVEN = 3;//双
+    uint256 constant BIG = 4;//大
+    uint256 constant THREE_1 = 1;//三个1
+    uint256 constant THREE_2 = 2;//三个2
+    uint256 constant THREE_3 = 3;//三个3
+    uint256 constant THREE_4 = 4;//三个4
+    uint256 constant THREE_5 = 5;//三个5
+    uint256 constant THREE_6 = 6;//三个6
+    uint256 constant THREE_SAME = 7;//三个相同
+    uint256 constant SUM_4 = 8;
+    uint256 constant SUM_5 = 9;
+    uint256 constant SUM_6 = 10;
+    uint256 constant SUM_7 = 11;
+    uint256 constant SUM_8 = 12;
+    uint256 constant SUM_9 = 13;
+    uint256 constant SUM_10 = 14;
+    uint256 constant SUM_11 = 15;
+    uint256 constant SUM_12 = 16;
+    uint256 constant SUM_13 = 17;
+    uint256 constant SUM_14 = 18;
+    uint256 constant SUM_15 = 19;
+    uint256 constant SUM_16 = 20;
+    uint256 constant SUM_17 = 21;
+    /*投注点倍率列表*/
+    mapping(uint32 => uint32) public BET_POS_MULTIPLE;
+    /*允许的投注金额*/
+    mapping(uint32 => uint32) public BET_VALUES;
+    constructor (address _craft, address _minerCFTAddr) public {
+        craftToken = IERC20(_craft);
+        minerCFTAddr = _minerCFTAddr;
+        BET_POS_MULTIPLE[SMALL] = 1;
+        BET_POS_MULTIPLE[ODD] = 1;
+        BET_POS_MULTIPLE[EVEN] = 1;
+        BET_POS_MULTIPLE[BIG] = 1;
+        BET_POS_MULTIPLE[THREE_1] = 150;
+        BET_POS_MULTIPLE[THREE_2] = 150;
+        BET_POS_MULTIPLE[THREE_3] = 150;
+        BET_POS_MULTIPLE[THREE_4] = 150;
+        BET_POS_MULTIPLE[THREE_5] = 150;
+        BET_POS_MULTIPLE[THREE_6] = 150;
+        BET_POS_MULTIPLE[THREE_SAME] = 24;
+        BET_POS_MULTIPLE[SUM_4] = 50;
+        BET_POS_MULTIPLE[SUM_5] = 18;
+        BET_POS_MULTIPLE[SUM_6] = 14;
+        BET_POS_MULTIPLE[SUM_7] = 12;
+        BET_POS_MULTIPLE[SUM_8] = 8;
+        BET_POS_MULTIPLE[SUM_9] = 6;
+        BET_POS_MULTIPLE[SUM_10] = 6;
+        BET_POS_MULTIPLE[SUM_11] = 6;
+        BET_POS_MULTIPLE[SUM_12] = 6;
+        BET_POS_MULTIPLE[SUM_13] = 8;
+        BET_POS_MULTIPLE[SUM_14] = 12;
+        BET_POS_MULTIPLE[SUM_15] = 14;
+        BET_POS_MULTIPLE[SUM_16] = 18;
+        BET_POS_MULTIPLE[SUM_17] = 50;
+    }
+
+    function destroy() onlyOwner public {
+        craftToken.renounceContracter();
+        // transferTRXToTeam(address(this).balance);
+        transferCFTToTeam(craftToken.balanceOf(address(this)));
+        selfdestruct(team);
+    }
 
     address public minerCFTAddr;
 
@@ -26,6 +92,8 @@ contract CraftDice is Ownable {
 
     address public team;
     address public teamCFT;
+    /*下注信息的map*/
+    mapping(address => mapping(string => uint32)) betMap;
 
     function updateTeamAddr(address _addr) onlyOwner public {
         team = _addr;
@@ -41,18 +109,6 @@ contract CraftDice is Ownable {
 
     function transferCFTToTeam(uint256 _amount) onlyOwner public {
         craftToken.transfer(teamCFT, _amount);
-    }
-
-    function destroy() onlyOwner public {
-        craftToken.renounceContracter();
-        // transferTRXToTeam(address(this).balance);
-        transferCFTToTeam(craftToken.balanceOf(address(this)));
-        selfdestruct(team);
-    }
-
-    constructor (address _craft, address _minerCFTAddr) public {
-        craftToken = IERC20(_craft);
-        minerCFTAddr = _minerCFTAddr;
     }
 
     function updateMinerCFTAddr(address _addr) onlyOwner public {
@@ -88,22 +144,57 @@ contract CraftDice is Ownable {
         // rand num
         difficulty = block.difficulty;
         blockstamp = block.timestamp;
-        uint256 randNum = uint256(sha256(abi.encodePacked(difficulty, msg.sender, blockstamp))) % 100 + 1;
+        uint256 diceA = uint256(sha256(abi.encodePacked(difficulty, msg.sender, blockstamp, 1))) % 6 + 1;
+        uint256 diceB = uint256(sha256(abi.encodePacked(difficulty, msg.sender, blockstamp, 11))) % 6 + 1;
+        uint256 diceC = uint256(sha256(abi.encodePacked(difficulty, msg.sender, blockstamp, 111))) % 6 + 1;
         //distributed CFT
         uint256 cftReward = curCFTReward().mul(msg.value).div(10);
         craftToken.transferFrom(minerCFTAddr, msg.sender, cftReward);
         //distributed bonus
-        if (randNum < num) {
+        if (diceA < num) {
             uint256 bonus = msg.value.mul(odds[num - 4]).div(1000);
             require(bonus < address(this).balance, "Greater than contract money");
             msg.sender.transfer(bonus * 1 sun);
-            emit LogBet(msg.sender, msg.value, bonus, num, randNum, true, now);
+            emit LogBet(msg.sender, msg.value, bonus, num, diceA, true, now);
             _res = true;
         } else {
-            emit LogBet(msg.sender, msg.value, 0, num, randNum, false, now);
+            emit LogBet(msg.sender, msg.value, 0, num, diceA, false, now);
             _res = false;
         }
-        _randNum = randNum;
+        _randNum = diceA;
+        return;
+    }
+
+    function open() public {
+        uint256 diceA = uint256(sha256(abi.encodePacked(block.difficulty, msg.sender, block.timestamp, 1))) % 6 + 1;
+        uint256 diceB = uint256(sha256(abi.encodePacked(block.difficulty, msg.sender, block.timestamp, 11))) % 6 + 1;
+        uint256 diceC = uint256(sha256(abi.encodePacked(block.difficulty, msg.sender, block.timestamp, 111))) % 6 + 1;
+        uint256 sum = diceA + diceB + diceC;
+        bool small = false;
+        bool odd = false;
+        bool big = false;
+        bool even = false;
+        bool threeSame = false;
+        //小，1赔1
+        if (sum >= 4 && sum <= 10) {
+            small = true;
+        }
+        //单
+        if (sum == 5 || sum == 7 || sum == 9 || sum == 11 || sum == 13 || sum == 15 | sum == 17) {
+            odd = true;
+        }
+        //大，1赔1
+        if (sum >= 11 && sum <= 17) {
+            big = true;
+        }
+        //双
+        if (sum == 4 || sum == 6 || sum == 8 || sum == 10 || sum == 12 || sum == 14 | sum == 16) {
+            even = true;
+        }
+        //三个数字相同，豹子，1赔150
+        if (i == j && j == k && i == 1) {
+            threeSame = true;
+        }
         return;
     }
 

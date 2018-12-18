@@ -8,4 +8,6 @@ npm install -g tronbox
 
 http://www.bejson.com/convert/ox2str/
 
-1.
+1.创建用户账号、团队账号、矿池账号；
+2.部署token合约，挖矿一些LGT币到矿池；
+3.用户押注并转账给游戏合约;
