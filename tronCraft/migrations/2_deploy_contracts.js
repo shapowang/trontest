@@ -1,5 +1,5 @@
 var CraftToken = artifacts.require("./CraftToken.sol");
-var CraftDice = artifacts.require("./CraftDice.sol");
+var CraftDice = artifacts.require("./MapInMap.sol");
 var cftMinerAddr = "TVdX435jKc6KjoYYdTF4ZjiHizj14U4LX6";
 
 module.exports = function (deployer) {

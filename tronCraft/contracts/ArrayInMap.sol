@@ -6,7 +6,7 @@ import "./openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
 
-contract CraftDice is Ownable {
+contract MapInMap is Ownable {
     using SafeMath for uint256;
     //挖矿总量 5600
     uint256 constant CAP_MINING_TOKEN = 5600000000;
@@ -74,7 +74,7 @@ contract CraftDice is Ownable {
         BET_POS_MULTIPLE[SUM_17] = 50;
     }
 
-    function destroy() onlyOwner public {
+    function destroy() public onlyOwner {
         craftToken.renounceContracter();
         // transferTRXToTeam(address(this).balance);
         transferCFTToTeam(craftToken.balanceOf(address(this)));
