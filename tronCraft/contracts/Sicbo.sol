@@ -74,7 +74,7 @@ contract Sicbo is Ownable {
 
     function destroy() public onlyOwner {
         craftToken.renounceContracter();
-        // transferTRXToTeam(address(this).balance);
+        transferTRXToTeam(address(this).balance);
         transferCFTToTeam(craftToken.balanceOf(address(this)));
         selfdestruct(team);
     }
@@ -163,7 +163,7 @@ contract Sicbo is Ownable {
     function bet(uint8 betPos) payable public {
         require(running, "can't bet at this time");
         require(betPos >= SMALL && betPos <= SUM_17, "bet pos should in [1,21]");
-        require(msg.value > 0);
+        require(msg.value > 0 && msg.value < 1000000000000, "bet value should in [1,1000000 trx]");
         betList.push(Bet({user : msg.sender, betPos : betPos, betAmount : msg.value}));
         emit LogBet(msg.sender, msg.value, betPos, now);
         for (uint i = 0; i < recentAddressList.length; i++) {
@@ -176,6 +176,10 @@ contract Sicbo is Ownable {
         }
         recentAddressList[recentAddressCursor++] = msg.sender;
         return;
+    }
+
+    function getLotteryUserList() public view returns (address[]){
+        return recentAddressList;
     }
 
     /*
@@ -258,7 +262,7 @@ contract Sicbo is Ownable {
             {
                 Bet memory userBet = betList[j];
                 if (winPos == userBet.betPos) {
-                    uint win = userBet.betAmount * BET_POS_MULTIPLE[userBet.betPos];
+                    uint win = userBet.betAmount + userBet.betAmount * BET_POS_MULTIPLE[userBet.betPos];
                     totalToPay += win;
                 }
             }
@@ -271,7 +275,7 @@ contract Sicbo is Ownable {
             {
                 Bet memory userBet1 = betList[y];
                 if (winPos1 == userBet1.betPos) {
-                    uint win1 = userBet1.betAmount * BET_POS_MULTIPLE[userBet1.betPos];
+                    uint win1 = userBet1.betAmount + userBet1.betAmount * BET_POS_MULTIPLE[userBet1.betPos];
                     emit LogBet(userBet1.user, win1, userBet1.betPos, now);
                     msg.sender.transfer(win1 * 1 sun);
                 }
