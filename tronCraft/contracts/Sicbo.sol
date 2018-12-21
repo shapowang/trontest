@@ -6,7 +6,7 @@ import "./openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
 
-contract MapInMap is Ownable {
+contract Sicbo is Ownable {
     using SafeMath for uint256;
     //挖矿总量 5600
     uint256 constant CAP_MINING_TOKEN = 5600000000;
@@ -41,8 +41,6 @@ contract MapInMap is Ownable {
     uint8 constant SUM_17 = 21;
     /*投注点倍率列表*/
     mapping(uint8 => uint32) public BET_POS_MULTIPLE;
-
-    itmapInner tmp;
 
     constructor (address _craft, address _minerCFTAddr) public {
         craftToken = IERC20(_craft);
@@ -81,130 +79,14 @@ contract MapInMap is Ownable {
         selfdestruct(team);
     }
 
-    struct itmap
-    {
-        mapping(address => IndexValue) data;
-        KeyFlag[] keys;
-        uint size;
-    }
-
-    struct IndexValue {uint keyIndex; itmapInner value;}
-
-    struct KeyFlag {address key; bool deleted;}
-
-    function insert(itmap storage self, address key, itmapInner value) private view returns (bool replaced)
-    {
-        uint keyIndex = self.data[key].keyIndex;
-        self.data[key].value = value;
-        if (keyIndex > 0) {
-            return true;
-        }
-        else
-        {
-            keyIndex = self.keys.length++;
-            self.data[key].keyIndex = keyIndex + 1;
-            self.keys[keyIndex].key = key;
-            self.size++;
-            return false;
-        }
-    }
-
-    function contains(itmap storage self, address key) private view returns (bool)
-    {
-        return self.data[key].keyIndex > 0;
-    }
-
-    function iterate_start(itmap storage self) private view returns (uint keyIndex)
-    {
-        return iterate_next(self, uint(- 1));
-    }
-
-    function iterate_valid(itmap storage self, uint keyIndex) private view returns (bool)
-    {
-        return keyIndex < self.keys.length;
-    }
-
-    function iterate_next(itmap storage self, uint keyIndex) private view returns (uint r_keyIndex)
-    {
-        keyIndex++;
-        while (keyIndex < self.keys.length && self.keys[keyIndex].deleted) {
-            keyIndex++;
-        }
-        return keyIndex;
-    }
-
-    function iterate_get(itmap storage self, uint keyIndex) private view returns (address key, itmapInner value)
-    {
-        key = self.keys[keyIndex].key;
-        value = self.data[key].value;
-    }
-
-    struct itmapInner
-    {
-        mapping(uint => IndexValueInner) data;
-        KeyFlagInner[] keys;
-        uint size;
-    }
-
-    struct IndexValueInner {uint keyIndex; uint value;}
-
-    struct KeyFlagInner {uint key; bool deleted;}
-
-    function insertInner(itmapInner storage self, uint key, uint value) private view returns (bool replaced)
-    {
-        uint keyIndex = self.data[key].keyIndex;
-        self.data[key].value = value;
-        if (keyIndex > 0) {
-            return true;
-        }
-        else
-        {
-            keyIndex = self.keys.length++;
-            self.data[key].keyIndex = keyIndex + 1;
-            self.keys[keyIndex].key = key;
-            self.size++;
-            return false;
-        }
-    }
-
-    function containsInner(itmapInner storage self, uint key) private view returns (bool)
-    {
-        return self.data[key].keyIndex > 0;
-    }
-
-    function iterate_startInner(itmapInner storage self) private view returns (uint keyIndex)
-    {
-        return iterate_nextInner(self, uint(- 1));
-    }
-
-    function iterate_validInner(itmapInner storage self, uint keyIndex) private view returns (bool)
-    {
-        return keyIndex < self.keys.length;
-    }
-
-    function iterate_nextInner(itmapInner storage self, uint keyIndex) private view returns (uint r_keyIndex)
-    {
-        keyIndex++;
-        while (keyIndex < self.keys.length && self.keys[keyIndex].deleted) {
-            keyIndex++;
-        }
-        return keyIndex;
-    }
-
-    function iterate_getInner(itmapInner storage self, uint keyIndex) private view returns (uint key, uint value)
-    {
-        key = self.keys[keyIndex].key;
-        value = self.data[key].value;
-    }
 
     address public minerCFTAddr;
 
     IERC20 craftToken;
 
     address public team;
+
     address public teamCFT;
-    /*下注信息的map*/
-    itmap betMap;
 
     function updateTeamAddr(address _addr) onlyOwner public {
         team = _addr;
@@ -228,7 +110,13 @@ contract MapInMap is Ownable {
 
     event LogBet(address indexed userAddr, uint256 betMoney, uint256 betPos, uint256 timeStamp);
 
-    event LogBetByCFT(address indexed userAddr, uint256 betMoney, uint256 bonus, uint256 num, uint256 randNum, bool res, uint256 timeStamp);
+    event Lottery(address indexed userAddr, uint256 timeStamp);
+
+    struct Bet {
+        address user;
+        uint8 betPos;
+        uint betAmount;
+    }
 
     function curCFTReward() public view returns (uint256) {
         uint256 curMiningToken = CAP_MINING_TOKEN.sub(craftToken.balanceOf(minerCFTAddr).div(10 ** DECIMALS));
@@ -248,23 +136,50 @@ contract MapInMap is Ownable {
             return 0;
         }
     }
+    /*本局投注信息列表*/
+    Bet[] betList;
+    /*最近玩儿游戏的玩家列表*/
+    address[] recentAddressList;
+    /*最近玩儿游戏的玩家列表的指针*/
+    uint8 recentAddressCursor;
+    /*false则游戏不可投注*/
+    bool running;
+
+    function getRunning() public view returns (bool){
+        return running;
+    }
+
+    function betStart() public onlyOwner {
+        running = true;
+    }
+
+    function betStop() public onlyOwner {
+        running = false;
+    }
 
     /*
     玩家投注
     */
     function bet(uint8 betPos) payable public {
+        require(running, "can't bet at this time");
         require(betPos >= SMALL && betPos <= SUM_17, "bet pos should in [1,21]");
         require(msg.value > 0);
-        itmapInner storage userBetMap = betMap.data[address(msg.sender)].value;
-        (uint keyInner, uint valueInner) = iterate_getInner(userBetMap, betPos);
-        userBetMap.data[betPos].value = userBetMap.data[betPos].value + msg.value;
-        insertInner(userBetMap, betPos, msg.value + valueInner);
+        betList.push(Bet({user : msg.sender, betPos : betPos, betAmount : msg.value}));
         emit LogBet(msg.sender, msg.value, betPos, now);
+        for (uint i = 0; i < recentAddressList.length; i++) {
+            if (recentAddressList[i] == msg.sender) {
+                return;
+            }
+        }
+        if (recentAddressCursor == 50) {
+            recentAddressCursor = uint8(0);
+        }
+        recentAddressList[recentAddressCursor++] = msg.sender;
         return;
     }
 
     /*
-    开奖
+    骰宝开奖
     */
     function open() public {
         uint8 diceA = uint8(sha256(abi.encodePacked(block.difficulty, msg.sender, block.timestamp, uint8(1)))) % 6 + 1;
@@ -306,16 +221,62 @@ contract MapInMap is Ownable {
                 results[cursor++] = THREE_6;
             }
         }
-        for (uint i = iterate_start(betMap); iterate_valid(betMap, i); i = iterate_next(betMap, i))
-        {
-            (address key,itmapInner memory value) = iterate_get(betMap, i);
-            tmp = value;
-            for (uint j = iterate_startInner(tmp); iterate_validInner(tmp, j); j = iterate_nextInner(tmp, j))
-            {
-                (uint betPos,uint betAmount) = iterate_getInner(tmp, j);
-            }
-        }
-        return;
+        sendAward(results);
     }
 
+    /*最近玩家抽奖*/
+    function lotteryOpen(uint count) public onlyOwner {
+        address[] memory winners = new address[](count);
+        uint idx = 0;
+        while (true) {
+            bool duplicate = false;
+            uint8 random = uint8(sha256(abi.encodePacked(block.difficulty, msg.sender, block.timestamp, uint8(111)))) % uint8(recentAddressList.length);
+            for (uint8 i = 0; i < winners.length; i++) {
+                if (winners[i] == recentAddressList[random]) {
+                    duplicate = true;
+                    break;
+                }
+            }
+            if (!duplicate) {
+                winners[idx++] = recentAddressList[random];
+                if (idx >= count) {
+                    for (uint8 j = 0; j < winners.length; j++) {
+                        emit Lottery(winners[j], now);
+                    }
+                }
+            }
+        }
+    }
+
+    /*发送骰宝奖励*/
+    function sendAward(uint8[] results) public payable {
+        uint totalToPay;
+        for (uint i = 0; i < results.length; i++)
+        {
+            uint8 winPos = results[i];
+            for (uint j = 0; j < betList.length; j++)
+            {
+                Bet memory userBet = betList[j];
+                if (winPos == userBet.betPos) {
+                    uint win = userBet.betAmount * BET_POS_MULTIPLE[userBet.betPos];
+                    totalToPay += win;
+                }
+            }
+        }
+        require(totalToPay <= address(this).balance, "not enough money to pay");
+        for (uint x = 0; x < results.length; x++)
+        {
+            uint8 winPos1 = results[x];
+            for (uint y = 0; y < betList.length; y++)
+            {
+                Bet memory userBet1 = betList[y];
+                if (winPos1 == userBet1.betPos) {
+                    uint win1 = userBet1.betAmount * BET_POS_MULTIPLE[userBet1.betPos];
+                    emit LogBet(userBet1.user, win1, userBet1.betPos, now);
+                    msg.sender.transfer(win1 * 1 sun);
+                }
+            }
+        }
+        betList.length = 0;
+    }
 }
