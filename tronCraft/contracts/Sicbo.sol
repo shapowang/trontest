@@ -164,7 +164,7 @@ contract Sicbo is Ownable {
         require(running, "can't bet at this time");
         require(betPos >= SMALL && betPos <= SUM_17, "bet pos should in [1,21]");
         require(msg.value > 0 && msg.value < 1000000000000, "bet value should in [1,1000000 trx]");
-        betList.push(Bet({user : msg.sender, betPos : betPos, betAmount : msg.value}));
+        betList.push(Bet(msg.sender, betPos, msg.value));
         emit LogBet(msg.sender, msg.value, betPos, now);
         for (uint i = 0; i < recentAddressList.length; i++) {
             if (recentAddressList[i] == msg.sender) {

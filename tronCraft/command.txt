@@ -11,3 +11,27 @@ http://www.bejson.com/convert/ox2str/
 1.创建用户账号、团队账号、矿池账号；
 2.部署token合约，挖矿一些LGT币到矿池；
 3.用户押注并转账给游戏合约;
+
+
+yhws-MacBook-Pro:tronCraft yhw$ tronbox migrate --network shasta --reset
+(node:4675) V8: /Users/yhw/.nvm/versions/node/v11.4.0/lib/node_modules/tronbox/build/cli.bundled.js:171571 Invalid asm.js: Invalid member of stdlib
+Using network 'shasta'.
+
+Running migration: 1_initial_migration.js
+  Replacing Migrations...
+  Migrations:
+    (base58) TEEZSetVHu53NdWWYUGEBwNArPPb52JfTk
+    (hex) 412ec7ce5c3c24b2ead679476976f9b036193e3ad7
+Saving successful migration to network...
+Saving artifacts...
+Running migration: 2_deploy_contracts.js
+  Replacing CraftToken...
+  CraftToken:
+    (base58) TKC9g6ctHB2zQiazxF5cZeZLk5NR48UwFe
+    (hex) 41652bc32baa761d3d05cbcd863c2288a753f0a89f
+  Deploying Sicbo...
+Saving successful migration to network...
+Saving artifacts...
+  Sicbo:
+    (base58) TS38Zof2dgc92XqkgG6W9M7zcquDfHM4Pt
+    (hex) 41b03ff9511bac947c14c4d8cf4ee1d34f336f91d1
