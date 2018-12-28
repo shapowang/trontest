@@ -35,3 +35,7 @@ Saving artifacts...
   Sicbo:
     (base58) TS38Zof2dgc92XqkgG6W9M7zcquDfHM4Pt
     (hex) 41b03ff9511bac947c14c4d8cf4ee1d34f336f91d1
+
+https://api.shasta.trongrid.io/wallet/gettransactionbyid?value=aec485269033e93ce1fa594f2916256df907b171e5161db0462321d7bc88985f
+
+https://api.shasta.trongrid.io/wallet/gettransactioninfobyid?value=01e6a25d5e79a1ba6408acd1adb4f5e8176111681c47d6b70d7e1c0a9e3fcea6

@@ -1,5 +1,5 @@
 pragma solidity ^0.4.23;
-
+pragma experimental ABIEncoderV2;
 
 import "./openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -110,6 +110,10 @@ contract Sicbo is Ownable {
 
     event LogBet(address indexed userAddr, uint256 betMoney, uint256 betPos, uint256 timeStamp);
 
+    event LogDice(uint8 a, uint8 b, uint8 c, uint256 timeStamp);
+
+    event LogWin(address indexed userAddr, uint256 betMoney, uint256 betPos, uint256 timeStamp, uint256 win);
+
     event Lottery(address indexed userAddr, uint256 timeStamp);
 
     struct Bet {
@@ -136,12 +140,28 @@ contract Sicbo is Ownable {
             return 0;
         }
     }
+
     /*本局投注信息列表*/
     Bet[] betList;
+
+    function getBetList() public view returns (Bet[]){
+        return betList;
+    }
+
     /*最近玩儿游戏的玩家列表*/
     address[] recentAddressList;
+
+    function getLotteryUserList() public view returns (address[]){
+        return recentAddressList;
+    }
+
     /*最近玩儿游戏的玩家列表的指针*/
     uint8 recentAddressCursor;
+
+    function getRecentAddressCursor() public view returns (uint8){
+        return recentAddressCursor;
+    }
+
     /*false则游戏不可投注*/
     bool running;
 
@@ -157,15 +177,32 @@ contract Sicbo is Ownable {
         running = false;
     }
 
+    uint va;
+
+    function getVA() public view returns (uint){
+        return va;
+    }
+
+    uint vb;
+
+    function getVB() public view returns (uint){
+        return vb;
+    }
+
     /*
     玩家投注
     */
     function bet(uint8 betPos) payable public {
         require(running, "can't bet at this time");
+        va = betPos;
+        vb = msg.value;
         require(betPos >= SMALL && betPos <= SUM_17, "bet pos should in [1,21]");
         require(msg.value > 0 && msg.value < 1000000000000, "bet value should in [1,1000000 trx]");
+        va = 1;
         betList.push(Bet(msg.sender, betPos, msg.value));
+        va = 2;
         emit LogBet(msg.sender, msg.value, betPos, now);
+        va = 3;
         for (uint i = 0; i < recentAddressList.length; i++) {
             if (recentAddressList[i] == msg.sender) {
                 return;
@@ -174,12 +211,10 @@ contract Sicbo is Ownable {
         if (recentAddressCursor == 50) {
             recentAddressCursor = uint8(0);
         }
+        va = 4;
         recentAddressList[recentAddressCursor++] = msg.sender;
+        va = 5;
         return;
-    }
-
-    function getLotteryUserList() public view returns (address[]){
-        return recentAddressList;
     }
 
     /*
@@ -189,6 +224,7 @@ contract Sicbo is Ownable {
         uint8 diceA = uint8(sha256(abi.encodePacked(block.difficulty, msg.sender, block.timestamp, uint8(1)))) % 6 + 1;
         uint8 diceB = uint8(sha256(abi.encodePacked(block.difficulty, msg.sender, block.timestamp, uint8(11)))) % 6 + 1;
         uint8 diceC = uint8(sha256(abi.encodePacked(block.difficulty, msg.sender, block.timestamp, uint8(111)))) % 6 + 1;
+        emit LogDice(diceA, diceB, diceC, now);
         uint8 sum = diceA + diceB + diceC;
         //小，1赔1
         uint8[] memory results = new uint8[](4);
@@ -276,7 +312,7 @@ contract Sicbo is Ownable {
                 Bet memory userBet1 = betList[y];
                 if (winPos1 == userBet1.betPos) {
                     uint win1 = userBet1.betAmount + userBet1.betAmount * BET_POS_MULTIPLE[userBet1.betPos];
-                    emit LogBet(userBet1.user, win1, userBet1.betPos, now);
+                    emit LogWin(userBet1.user, userBet1.betAmount, userBet1.betPos, now, win1);
                     msg.sender.transfer(win1 * 1 sun);
                 }
             }

@@ -2,8 +2,8 @@ const TronWeb = require('tronweb');
 const tokenJson = require('./build/contracts/CraftToken.json');
 const gameJson = require('./build/contracts/Sicbo.json');
 module.exports.processEnv = {
-    gameAddr: "TAy6CBf6ErDg7S1CR5mLoCbBv7kNsPqnDs",
-    tokenAddr: "TEMypaMmxGGn6JikEVA9Uko9DLy644z9QX"
+    gameAddr: "TBM4PPXRXyFJU735RgXvkTQtAjFb5j3qKr",
+    tokenAddr: "TCa3NAdUMqfWNcNBYtimuTCkXMf2GuGB4D"
 };
 
 const fullNode = new TronWeb.providers.HttpProvider('https://api.shasta.trongrid.io');
@@ -18,3 +18,4 @@ const tronWeb = new TronWeb(
 
 module.exports.tokenContract = tronWeb.contract(tokenJson.abi, module.exports.processEnv.tokenAddr);
 module.exports.gameContract = tronWeb.contract(gameJson.abi, module.exports.processEnv.gameAddr);
+module.exports.tronWeb = tronWeb;
